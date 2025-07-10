@@ -1,0 +1,71 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your account</p>
+    </div>
+
+    <div class="demo-users-section">
+      <h3>Demo Users (Click to fill)</h3>
+      <div class="demo-users-grid">
+        <button 
+          *ngFor="let user of demoUsers; trackBy: trackByEmail"
+          type="button" 
+          class="demo-user-btn"
+          (click)="fillDemoUser(user)"
+          [disabled]="isLoading">
+          <span class="user-name">{{ user.name }}</span>
+          <span class="user-email">{{ user.email }}</span>
+        </button>
+      </div>
+      <p class="demo-note">Password for all users: <strong>password123</strong></p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="Enter your email"
+          [class.invalid]="isFieldInvalid('email')"
+          [disabled]="isLoading">
+        <span *ngIf="isFieldInvalid('email')" class="error-message">{{ getErrorMessage('email') }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          [class.invalid]="isFieldInvalid('password')"
+          [disabled]="isLoading">
+        <span *ngIf="isFieldInvalid('password')" class="error-message">{{ getErrorMessage('password') }}</span>
+      </div>
+
+      <button 
+        type="submit" 
+        class="login-btn"
+        [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner"></span>
+        <span *ngIf="isLoading">Signing in...</span>
+        <span *ngIf="!isLoading">Sign In</span>
+      </button>
+    </form>
+
+    <div *ngIf="errorMessage" class="message error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="message success">
+      {{ successMessage }}
+    </div>
+
+    <div class="login-footer">
+      <p>Don't have an account? <a routerLink="/register">Sign up</a></p>
+    </div>
+  </div>
+</div>

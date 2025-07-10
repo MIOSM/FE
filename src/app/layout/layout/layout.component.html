@@ -1,0 +1,9 @@
+@if(showSidebar){
+<div class="sidebar">
+  <app-sidebar></app-sidebar>
+</div>
+}
+
+<main class="main-content" [class.no-sidebar]="!showSidebar">
+  <router-outlet></router-outlet>
+</main>

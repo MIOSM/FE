@@ -1,0 +1,51 @@
+<div class="user-info-container">
+  <div *ngIf="currentUser" class="user-card">
+    <div class="user-header">
+      <div class="user-avatar">
+        <span class="avatar-text">{{ currentUser.name.charAt(0) }}</span>
+      </div>
+      <h1>Welcome, {{ currentUser.name }}!</h1>
+      <p class="user-role">{{ currentUser.role | titlecase }}</p>
+    </div>
+
+    <div class="user-details">
+      <div class="detail-item">
+        <label>Email Address</label>
+        <span>{{ currentUser.email }}</span>
+      </div>
+      
+      <div class="detail-item">
+        <label>User ID</label>
+        <span>{{ currentUser.id }}</span>
+      </div>
+      
+      <div class="detail-item">
+        <label>Account Type</label>
+        <span class="role-badge">{{ currentUser.role }}</span>
+      </div>
+    </div>
+
+    <div class="user-actions">
+      <button class="logout-btn" (click)="logout()">
+        Sign Out
+      </button>
+    </div>
+
+    <div class="demo-info">
+      <h3>Demo Information</h3>
+      <p>This is a mock authentication system. The user data is stored locally and will persist until you sign out or clear your browser data.</p>
+      <p><strong>Available demo users:</strong></p>
+      <ul>
+        <li><strong>admin&#64;example.com</strong> - Admin User</li>
+        <li><strong>user&#64;example.com</strong> - Regular User</li>
+        <li><strong>john&#64;example.com</strong> - John Doe</li>
+      </ul>
+      <p>All users use the password: <strong>password123</strong></p>
+    </div>
+  </div>
+
+  <div *ngIf="!currentUser" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading user information...</p>
+  </div>
+</div>
