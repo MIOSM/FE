@@ -1,6 +1,6 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
       <h1>Welcome Back</h1>
       <p>Sign in to your account</p>
     </div>
@@ -21,37 +21,41 @@
       <p class="demo-note">Password for all users: <strong>password123</strong></p>
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
       <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="email" class="form-label">Email Address</label>
         <input
           type="email"
           id="email"
           formControlName="email"
+          class="form-input"
           placeholder="Enter your email"
-          [class.invalid]="isFieldInvalid('email')"
-          [disabled]="isLoading">
-        <span *ngIf="isFieldInvalid('email')" class="error-message">{{ getErrorMessage('email') }}</span>
+          [class.invalid]="isFieldInvalid('email')">
+        <div class="error-message" *ngIf="isFieldInvalid('email')">{{ getErrorMessage('email') }}</div>
       </div>
 
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password" class="form-label">Password</label>
         <input
           type="password"
           id="password"
           formControlName="password"
+          class="form-input"
           placeholder="Enter your password"
-          [class.invalid]="isFieldInvalid('password')"
-          [disabled]="isLoading">
-        <span *ngIf="isFieldInvalid('password')" class="error-message">{{ getErrorMessage('password') }}</span>
+          [class.invalid]="isFieldInvalid('password')">
+        <div class="error-message" *ngIf="isFieldInvalid('password')">{{ getErrorMessage('password') }}</div>
       </div>
 
       <button 
         type="submit" 
-        class="login-btn"
+        class="btn"
         [disabled]="loginForm.invalid || isLoading">
-        <span *ngIf="isLoading" class="spinner"></span>
-        <span *ngIf="isLoading">Signing in...</span>
+        <span *ngIf="isLoading" class="loading-spinner">
+          <svg class="spinner" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+          </svg>
+          Signing in...
+        </span>
         <span *ngIf="!isLoading">Sign In</span>
       </button>
     </form>
@@ -64,8 +68,8 @@
       {{ successMessage }}
     </div>
 
-    <div class="login-footer">
-      <p>Don't have an account? <a routerLink="/register">Sign up</a></p>
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/registration" class="link">Sign up</a></p>
     </div>
   </div>
 </div>

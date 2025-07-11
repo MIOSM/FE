@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, delay } from 'rxjs/operators';
 
 export interface User {
   id: number;
@@ -13,12 +15,30 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegistrationData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: User;
+  token?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+
+  private readonly API_BASE_URL = 'http://localhost:8080/api';
+  private readonly LOGIN_ENDPOINT = `${this.API_BASE_URL}/auth/login`;
+  private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
+  private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
 
   private mockUsers: User[] = [
     {
@@ -41,7 +61,7 @@ export class AuthService {
     }
   ];
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.checkStoredAuth();
   }
 
@@ -59,7 +79,28 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginCredentials): Observable<{ success: boolean; message: string; user?: User }> {
+  login(credentials: LoginCredentials): Observable<AuthResponse> {
+    // For now, directly use mock login since we don't have a real backend
+    return this.mockLogin(credentials);
+  }
+
+  register(userData: RegistrationData): Observable<AuthResponse> {
+    // For now, directly use mock registration since we don't have a real backend
+    return this.mockRegister(userData);
+  }
+
+  // Template methods for future backend integration
+  private mockLoginWithTemplateData(credentials: LoginCredentials): Observable<AuthResponse> {
+    // This will be replaced with real HTTP calls when backend is ready
+    return this.mockLogin(credentials);
+  }
+
+  private mockRegisterWithTemplateData(userData: RegistrationData): Observable<AuthResponse> {
+    // This will be replaced with real HTTP calls when backend is ready
+    return this.mockRegister(userData);
+  }
+
+  private mockLogin(credentials: LoginCredentials): Observable<AuthResponse> {
     return new Observable(observer => {
       setTimeout(() => {
         if (credentials.password === 'password123') {
@@ -73,12 +114,47 @@ export class AuthService {
 
             this.currentUserSubject.next(user);
             
-            observer.next({ success: true, message: 'Login successful!', user });
+            observer.next({ success: true, message: 'Login successful!', user, token });
           } else {
             observer.next({ success: false, message: 'User not found. Please register first.' });
           }
         } else {
           observer.next({ success: false, message: 'Invalid password. Use "password123" for all users.' });
+        }
+        observer.complete();
+      }, 1000);
+    });
+  }
+
+  private mockRegister(userData: RegistrationData): Observable<AuthResponse> {
+    return new Observable(observer => {
+      setTimeout(() => {
+        const existingUser = this.mockUsers.find(u => u.email === userData.email);
+        
+        if (existingUser) {
+          observer.next({ success: false, message: 'User with this email already exists.' });
+        } else {
+          const newUser: User = {
+            id: this.mockUsers.length + 1,
+            email: userData.email,
+            name: userData.name,
+            role: 'user'
+          };
+          
+          this.mockUsers.push(newUser);
+          const token = `mock_token_${newUser.id}_${Date.now()}`;
+
+          localStorage.setItem('access_token', token);
+          localStorage.setItem('user_data', JSON.stringify(newUser));
+
+          this.currentUserSubject.next(newUser);
+          
+          observer.next({ 
+            success: true, 
+            message: 'Registration successful! You can now login.', 
+            user: newUser, 
+            token 
+          });
         }
         observer.complete();
       }, 1000);
@@ -106,5 +182,31 @@ export class AuthService {
 
   getAvailableUsers(): User[] {
     return this.mockUsers;
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.getAccessToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    });
+  }
+
+  getUserProfile(): Observable<User> {
+    return new Observable(observer => {
+      setTimeout(() => {
+        const currentUser = this.getCurrentUser();
+        if (currentUser) {
+          observer.next(currentUser);
+        } else {
+          observer.error('User not authenticated');
+        }
+        observer.complete();
+      }, 500);
+    });
+  }
+
+  switchToRealBackend(): void {
+    console.log('Switching to real backend endpoints...');
   }
 }

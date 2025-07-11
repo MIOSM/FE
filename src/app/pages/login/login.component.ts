@@ -46,22 +46,33 @@ export class LoginComponent implements OnInit {
       this.errorMessage = '';
       this.successMessage = '';
 
+      this.loginForm.disable();
+
       const credentials: LoginCredentials = this.loginForm.value;
 
       this.authService.login(credentials).subscribe({
         next: (response) => {
           this.isLoading = false;
-          if (response.success) {
+          this.loginForm.enable();
+          
+          if (response && response.success) {
             this.successMessage = response.message;
+            if (response.token) {
+              localStorage.setItem('access_token', response.token);
+            }
+            if (response.user) {
+              localStorage.setItem('user_data', JSON.stringify(response.user));
+            }
             setTimeout(() => {
               this.router.navigate(['/user-info']);
             }, 1000);
           } else {
-            this.errorMessage = response.message;
+            this.errorMessage = response?.message || 'Login failed. Please try again.';
           }
         },
         error: (error) => {
           this.isLoading = false;
+          this.loginForm.enable();
           this.errorMessage = 'An error occurred during login. Please try again.';
           console.error('Login error:', error);
         }

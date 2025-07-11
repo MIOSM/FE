@@ -1,11 +1,136 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AuthService, RegistrationData } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-registration',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.scss'
 })
-export class RegistrationComponent {
+export class RegistrationComponent implements OnInit {
+  registrationForm!: FormGroup;
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
 
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.initForm();
+  }
+
+  private initForm(): void {
+    this.registrationForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  private passwordMatchValidator(form: FormGroup): { [key: string]: boolean } | null {
+    const password = form.get('password');
+    const confirmPassword = form.get('confirmPassword');
+    
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      return { passwordMismatch: true };
+    }
+    
+    return null;
+  }
+
+  onSubmit(): void {
+    if (this.registrationForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      this.registrationForm.disable();
+
+      const userData: RegistrationData = {
+        name: this.registrationForm.get('name')?.value,
+        email: this.registrationForm.get('email')?.value,
+        password: this.registrationForm.get('password')?.value
+      };
+
+      this.authService.register(userData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.registrationForm.enable();
+          
+          if (response && response.success) {
+            this.successMessage = response.message || 'Registration successful! You can now login.';
+            setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 2000);
+          } else {
+            this.errorMessage = response?.message || 'Registration failed. Please try again.';
+          }
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.registrationForm.enable();
+          this.errorMessage = 'An error occurred during registration. Please try again.';
+          console.error('Registration error:', error);
+        }
+      });
+    } else {
+      this.markFormGroupTouched();
+    }
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.registrationForm.controls).forEach(key => {
+      const control = this.registrationForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.registrationForm.get(controlName);
+    
+    if (control?.hasError('required')) {
+      return `${controlName.charAt(0).toUpperCase() + controlName.slice(1)} is required`;
+    }
+    
+    if (control?.hasError('email')) {
+      return 'Please enter a valid email address';
+    }
+    
+    if (control?.hasError('minlength')) {
+      const minLength = control.getError('minlength').requiredLength;
+      return `${controlName.charAt(0).toUpperCase() + controlName.slice(1)} must be at least ${minLength} characters`;
+    }
+    
+    return '';
+  }
+
+  getPasswordMismatchError(): string {
+    if (this.registrationForm.hasError('passwordMismatch')) {
+      return 'Passwords do not match';
+    }
+    return '';
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.registrationForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
+  }
+
+  isPasswordMismatch(): boolean {
+    return this.registrationForm.hasError('passwordMismatch') && 
+           this.registrationForm.get('confirmPassword')?.touched === true;
+  }
+
+  navigateToLogin(): void {
+    this.router.navigate(['/login']);
+  }
 }

@@ -1,1 +1,100 @@
-<p>registration works!</p>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>Create Account</h1>
+      <p>Join us and start your journey today</p>
+    </div>
+
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="name" class="form-label">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('name')"
+          placeholder="Enter your full name"
+        />
+        <div class="error-message" *ngIf="isFieldInvalid('name')">
+          {{ getErrorMessage('name') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('email')"
+          placeholder="Enter your email address"
+        />
+        <div class="error-message" *ngIf="isFieldInvalid('email')">
+          {{ getErrorMessage('email') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('password')"
+          placeholder="Create a strong password"
+        />
+        <div class="error-message" *ngIf="isFieldInvalid('password')">
+          {{ getErrorMessage('password') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('confirmPassword') || isPasswordMismatch()"
+          placeholder="Confirm your password"
+        />
+        <div class="error-message" *ngIf="isFieldInvalid('confirmPassword')">
+          {{ getErrorMessage('confirmPassword') }}
+        </div>
+        <div class="error-message" *ngIf="isPasswordMismatch()">
+          {{ getPasswordMismatchError() }}
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn"
+        [disabled]="registrationForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">Create Account</span>
+        <span *ngIf="isLoading" class="loading-spinner">
+          <svg class="spinner" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+          </svg>
+          Creating Account...
+        </span>
+      </button>
+
+      <div class="message-container">
+        <div class="success-message" *ngIf="successMessage">
+          {{ successMessage }}
+        </div>
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login" class="link">Sign in here</a></p>
+    </div>
+  </div>
+</div>
