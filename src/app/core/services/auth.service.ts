@@ -80,23 +80,18 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    // For now, directly use mock login since we don't have a real backend
     return this.mockLogin(credentials);
   }
 
   register(userData: RegistrationData): Observable<AuthResponse> {
-    // For now, directly use mock registration since we don't have a real backend
     return this.mockRegister(userData);
   }
 
-  // Template methods for future backend integration
   private mockLoginWithTemplateData(credentials: LoginCredentials): Observable<AuthResponse> {
-    // This will be replaced with real HTTP calls when backend is ready
     return this.mockLogin(credentials);
   }
 
   private mockRegisterWithTemplateData(userData: RegistrationData): Observable<AuthResponse> {
-    // This will be replaced with real HTTP calls when backend is ready
     return this.mockRegister(userData);
   }
 
