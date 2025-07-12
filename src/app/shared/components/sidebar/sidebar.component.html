@@ -1,4 +1,4 @@
-<div class="sidebar">
+<div class="sidebar desktop-sidebar" [class.icons-only]="isMediumScreen">
   <div class="sidebar-header">
     <aside class="logo">
       <img src="/assets/logo.png" alt="Logo" class="logo-img" />
@@ -21,16 +21,19 @@
     <ul class="nav-list">
       <li class="nav-item">
         <a routerLink="/user-info" routerLinkActive="active" class="nav-link">
+          <i class="nav-icon fas fa-user"></i>
           <span class="nav-text">Profile</span>
         </a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link disabled">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link disabled">
+          <i class="nav-icon fas fa-tachometer-alt"></i>
           <span class="nav-text">Dashboard</span>
         </a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link disabled">
+        <a routerLink="/settings" routerLinkActive="active" class="nav-link disabled">
+          <i class="nav-icon fas fa-cog"></i>
           <span class="nav-text">Settings</span>
         </a>
       </li>
@@ -39,7 +42,39 @@
 
   <div class="sidebar-footer">
     <button class="logout-btn" (click)="logout()">
+      <i class="logout-icon fas fa-sign-out-alt"></i>
       <span class="logout-text">Sign Out</span>
     </button>
   </div>
+</div>
+
+<div class="bottom-nav mobile-sidebar">
+  <nav class="bottom-nav-container">
+    <ul class="bottom-nav-list">
+      <li class="bottom-nav-item">
+        <a routerLink="/user-info" routerLinkActive="active" class="bottom-nav-link">
+          <i class="bottom-nav-icon fas fa-user"></i>
+          <span class="bottom-nav-text">Profile</span>
+        </a>
+      </li>
+      <li class="bottom-nav-item">
+        <a routerLink="/dashboard" routerLinkActive="active" class="bottom-nav-link disabled">
+          <i class="bottom-nav-icon fas fa-tachometer-alt"></i>
+          <span class="bottom-nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="bottom-nav-item">
+        <a routerLink="/settings" routerLinkActive="active" class="bottom-nav-link disabled">
+          <i class="bottom-nav-icon fas fa-cog"></i>
+          <span class="bottom-nav-text">Settings</span>
+        </a>
+      </li>
+      <li class="bottom-nav-item">
+        <button class="bottom-nav-link logout-btn-mobile" (click)="logout()">
+          <i class="bottom-nav-icon fas fa-sign-out-alt"></i>
+          <span class="bottom-nav-text">Logout</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
 </div>
