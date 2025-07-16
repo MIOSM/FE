@@ -6,17 +6,6 @@
     </aside>
   </div>
 
-  <div *ngIf="currentUser" class="user-section">
-    <div class="user-avatar">
-      <span class="avatar-text">{{ currentUser.name.charAt(0) }}</span>
-    </div>
-    <div class="user-info">
-      <h3 class="user-name">{{ currentUser.name }}</h3>
-      <p class="user-email">{{ currentUser.email }}</p>
-      <span class="user-role">{{ currentUser.role | titlecase }}</span>
-    </div>
-  </div>
-
   <nav class="sidebar-nav">
     <ul class="nav-list">
       <li class="nav-item">
