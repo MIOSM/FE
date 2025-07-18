@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, delay } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 export interface User {
   id: number;
@@ -40,27 +40,6 @@ export class AuthService {
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
   private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
 
-  private mockUsers: User[] = [
-    {
-      id: 1,
-      email: 'admin@example.com',
-      name: 'Admin User',
-      role: 'admin'
-    },
-    {
-      id: 2,
-      email: 'user@example.com',
-      name: 'Regular User',
-      role: 'user'
-    },
-    {
-      id: 3,
-      email: 'john@example.com',
-      name: 'John Doe',
-      role: 'user'
-    }
-  ];
-
   constructor(private http: HttpClient) {
     this.checkStoredAuth();
   }
@@ -68,7 +47,6 @@ export class AuthService {
   private checkStoredAuth(): void {
     const token = localStorage.getItem('access_token');
     const userData = localStorage.getItem('user_data');
-    
     if (token && userData) {
       try {
         const user = JSON.parse(userData);
@@ -80,80 +58,35 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.mockLogin(credentials);
+    return this.http.post<AuthResponse>(this.LOGIN_ENDPOINT, credentials).pipe(
+      map((response: AuthResponse) => {
+        if (response.success && response.token && response.user) {
+          localStorage.setItem('access_token', response.token);
+          localStorage.setItem('user_data', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+        return response;
+      }),
+      catchError(error => {
+        return throwError(() => error.error || { success: false, message: 'Login failed.' });
+      })
+    );
   }
 
   register(userData: RegistrationData): Observable<AuthResponse> {
-    return this.mockRegister(userData);
-  }
-
-  private mockLoginWithTemplateData(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.mockLogin(credentials);
-  }
-
-  private mockRegisterWithTemplateData(userData: RegistrationData): Observable<AuthResponse> {
-    return this.mockRegister(userData);
-  }
-
-  private mockLogin(credentials: LoginCredentials): Observable<AuthResponse> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        if (credentials.password === 'password123') {
-          const user = this.mockUsers.find(u => u.email === credentials.email);
-          
-          if (user) {
-            const token = `mock_token_${user.id}_${Date.now()}`;
-
-            localStorage.setItem('access_token', token);
-            localStorage.setItem('user_data', JSON.stringify(user));
-
-            this.currentUserSubject.next(user);
-            
-            observer.next({ success: true, message: 'Login successful!', user, token });
-          } else {
-            observer.next({ success: false, message: 'User not found. Please register first.' });
-          }
-        } else {
-          observer.next({ success: false, message: 'Invalid password. Use "password123" for all users.' });
+    return this.http.post<AuthResponse>(this.REGISTER_ENDPOINT, userData).pipe(
+      map((response: AuthResponse) => {
+        if (response.success && response.token && response.user) {
+          localStorage.setItem('access_token', response.token);
+          localStorage.setItem('user_data', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
         }
-        observer.complete();
-      }, 1000);
-    });
-  }
-
-  private mockRegister(userData: RegistrationData): Observable<AuthResponse> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        const existingUser = this.mockUsers.find(u => u.email === userData.email);
-        
-        if (existingUser) {
-          observer.next({ success: false, message: 'User with this email already exists.' });
-        } else {
-          const newUser: User = {
-            id: this.mockUsers.length + 1,
-            email: userData.email,
-            name: userData.name,
-            role: 'user'
-          };
-          
-          this.mockUsers.push(newUser);
-          const token = `mock_token_${newUser.id}_${Date.now()}`;
-
-          localStorage.setItem('access_token', token);
-          localStorage.setItem('user_data', JSON.stringify(newUser));
-
-          this.currentUserSubject.next(newUser);
-          
-          observer.next({ 
-            success: true, 
-            message: 'Registration successful! You can now login.', 
-            user: newUser, 
-            token 
-          });
-        }
-        observer.complete();
-      }, 1000);
-    });
+        return response;
+      }),
+      catchError(error => {
+        return throwError(() => error.error || { success: false, message: 'Registration failed.' });
+      })
+    );
   }
 
   logout(): void {
@@ -175,10 +108,6 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  getAvailableUsers(): User[] {
-    return this.mockUsers;
-  }
-
   private getAuthHeaders(): HttpHeaders {
     const token = this.getAccessToken();
     return new HttpHeaders({
@@ -188,20 +117,19 @@ export class AuthService {
   }
 
   getUserProfile(): Observable<User> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        const currentUser = this.getCurrentUser();
-        if (currentUser) {
-          observer.next(currentUser);
-        } else {
-          observer.error('User not authenticated');
+    return this.http.get<User>(this.USER_PROFILE_ENDPOINT, { headers: this.getAuthHeaders() }).pipe(
+      map((user: User) => {
+        if (user) {
+          this.currentUserSubject.next(user);
         }
-        observer.complete();
-      }, 500);
-    });
+        return user;
+      }),
+      catchError(error => {
+        return throwError(() => error.error || 'User not authenticated');
+      })
+    );
   }
 
-  switchToRealBackend(): void {
-    console.log('Switching to real backend endpoints...');
-  }
+  // Removed all mock methods and mockUsers array
+  // Removed switchToRealBackend (no longer needed)
 }
