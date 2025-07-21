@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
 
   private initForm(): void {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      login: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -48,13 +48,21 @@ export class LoginComponent implements OnInit {
 
       this.loginForm.disable();
 
-      const credentials: LoginCredentials = this.loginForm.value;
+      const loginValue = this.loginForm.get('login')?.value;
+      const credentials: any = {
+        password: this.loginForm.get('password')?.value
+      };
+
+      if (loginValue && loginValue.includes('@')) {
+        credentials.email = loginValue;
+      } else {
+        credentials.username = loginValue;
+      }
 
       this.authService.login(credentials).subscribe({
         next: (response) => {
           this.isLoading = false;
           this.loginForm.enable();
-          
           if (response && response.success) {
             this.successMessage = response.message;
             if (response.token) {
@@ -107,12 +115,16 @@ export class LoginComponent implements OnInit {
       return `${controlName.charAt(0).toUpperCase() + controlName.slice(1)} is required`;
     }
     
-    if (control?.hasError('email')) {
-      return 'Please enter a valid email address';
+    if (controlName === 'login' && control?.value && control.value.includes('@')) {
+      // Optionally, will email format validation if needed
+      // if (!/.+@.+\..+/.test(control.value)) {
+      //   return 'Please enter a valid email address';
+      // }
     }
     
     if (control?.hasError('minlength')) {
-      return `${controlName.charAt(0).toUpperCase() + controlName.slice(1)} must be at least 6 characters`;
+      const minLength = control.getError('minlength').requiredLength;
+      return `${controlName.charAt(0).toUpperCase() + controlName.slice(1)} must be at least ${minLength} characters`;
     }
     
     return '';

@@ -23,15 +23,15 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
       <div class="form-group">
-        <label for="email" class="form-label">Email Address</label>
+        <label for="login" class="form-label">Username or Email</label>
         <input
-          type="email"
-          id="email"
-          formControlName="email"
+          type="text"
+          id="login"
+          formControlName="login"
           class="form-input"
-          placeholder="Enter your email"
-          [class.invalid]="isFieldInvalid('email')">
-        <div class="error-message" *ngIf="isFieldInvalid('email')">{{ getErrorMessage('email') }}</div>
+          placeholder="Enter your username or email"
+          [class.invalid]="isFieldInvalid('login')">
+        <div class="error-message" *ngIf="isFieldInvalid('login')">{{ getErrorMessage('login') }}</div>
       </div>
 
       <div class="form-group">

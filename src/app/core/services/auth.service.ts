@@ -16,9 +16,11 @@ export interface LoginCredentials {
 }
 
 export interface RegistrationData {
-  name: string;
+  username: string;
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface AuthResponse {
@@ -35,7 +37,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  private readonly API_BASE_URL = 'http://localhost:8080/api';
+  private readonly API_BASE_URL = 'http://localhost:8080';
   private readonly LOGIN_ENDPOINT = `${this.API_BASE_URL}/auth/login`;
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
   private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
@@ -129,7 +131,4 @@ export class AuthService {
       })
     );
   }
-
-  // Removed all mock methods and mockUsers array
-  // Removed switchToRealBackend (no longer needed)
 }

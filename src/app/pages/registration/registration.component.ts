@@ -29,10 +29,12 @@ export class RegistrationComponent implements OnInit {
 
   private initForm(): void {
     this.registrationForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
+      username: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]]
     }, { validators: this.passwordMatchValidator });
   }
 
@@ -55,17 +57,18 @@ export class RegistrationComponent implements OnInit {
 
       this.registrationForm.disable();
 
-      const userData: RegistrationData = {
-        name: this.registrationForm.get('name')?.value,
+      const userData = {
+        username: this.registrationForm.get('username')?.value,
         email: this.registrationForm.get('email')?.value,
-        password: this.registrationForm.get('password')?.value
+        password: this.registrationForm.get('password')?.value,
+        firstName: this.registrationForm.get('firstName')?.value,
+        lastName: this.registrationForm.get('lastName')?.value
       };
 
       this.authService.register(userData).subscribe({
         next: (response) => {
           this.isLoading = false;
           this.registrationForm.enable();
-          
           if (response && response.success) {
             this.successMessage = response.message || 'Registration successful! You can now login.';
             setTimeout(() => {

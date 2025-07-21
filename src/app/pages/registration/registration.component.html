@@ -7,17 +7,47 @@
 
     <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="auth-form">
       <div class="form-group">
-        <label for="name" class="form-label">Full Name</label>
+        <label for="username" class="form-label">Username</label>
         <input
           type="text"
-          id="name"
-          formControlName="name"
+          id="username"
+          formControlName="username"
           class="form-input"
-          [class.invalid]="isFieldInvalid('name')"
-          placeholder="Enter your full name"
+          [class.invalid]="isFieldInvalid('username')"
+          placeholder="Enter your username"
         />
-        <div class="error-message" *ngIf="isFieldInvalid('name')">
-          {{ getErrorMessage('name') }}
+        <div class="error-message" *ngIf="isFieldInvalid('username')">
+          {{ getErrorMessage('username') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="firstName" class="form-label">First Name</label>
+        <input
+          type="text"
+          id="firstName"
+          formControlName="firstName"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('firstName')"
+          placeholder="Enter your first name"
+        />
+        <div class="error-message" *ngIf="isFieldInvalid('firstName')">
+          {{ getErrorMessage('firstName') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName" class="form-label">Last Name</label>
+        <input
+          type="text"
+          id="lastName"
+          formControlName="lastName"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('lastName')"
+          placeholder="Enter your last name"
+        />
+        <div class="error-message" *ngIf="isFieldInvalid('lastName')">
+          {{ getErrorMessage('lastName') }}
         </div>
       </div>
 
