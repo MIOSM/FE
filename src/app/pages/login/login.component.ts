@@ -17,12 +17,6 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  demoUsers = [
-    { email: 'admin@example.com', name: 'Admin User' },
-    { email: 'user@example.com', name: 'Regular User' },
-    { email: 'john@example.com', name: 'John Doe' }
-  ];
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,

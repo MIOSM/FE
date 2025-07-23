@@ -4,10 +4,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 
 export interface User {
-  id: number;
+  username: string;
   email: string;
-  name: string;
-  role: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface LoginCredentials {
