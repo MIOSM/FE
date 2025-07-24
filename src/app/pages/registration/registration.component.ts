@@ -67,14 +67,39 @@ export class RegistrationComponent implements OnInit {
 
       this.authService.register(userData).subscribe({
         next: (response) => {
-          this.isLoading = false;
-          this.registrationForm.enable();
           if (response && response.success) {
-            this.successMessage = response.message || 'Registration successful! You can now login.';
-            setTimeout(() => {
-              this.router.navigate(['/login']);
-            }, 2000);
+            const credentials: any = {
+              password: userData.password
+            };
+
+            if (userData.email) {
+              credentials.email = userData.email;
+            } else {
+              credentials.username = userData.username;
+            }
+            this.authService.login(credentials).subscribe({
+              next: (loginResponse) => {
+                this.isLoading = false;
+                this.registrationForm.enable();
+                if (loginResponse && loginResponse.success) {
+                  this.successMessage = 'Registration and login successful! Redirecting...';
+                  setTimeout(() => {
+                    this.router.navigate(['/user-info']);
+                  }, 1000);
+                } else {
+                  this.errorMessage = loginResponse?.message || 'Login after registration failed. Please try to login manually.';
+                }
+              },
+              error: (loginError) => {
+                this.isLoading = false;
+                this.registrationForm.enable();
+                this.errorMessage = 'Registration succeeded, but auto-login failed. Please try to login manually.';
+                console.error('Auto-login error:', loginError);
+              }
+            });
           } else {
+            this.isLoading = false;
+            this.registrationForm.enable();
             this.errorMessage = response?.message || 'Registration failed. Please try again.';
           }
         },
