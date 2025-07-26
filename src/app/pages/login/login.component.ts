@@ -84,13 +84,6 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  fillDemoUser(user: { email: string; name: string }): void {
-    this.loginForm.patchValue({
-      email: user.email,
-      password: 'password123' 
-    });
-  }
-
   trackByEmail(index: number, user: { email: string; name: string }): string {
     return user.email;
   }

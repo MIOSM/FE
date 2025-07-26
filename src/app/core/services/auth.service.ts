@@ -23,6 +23,12 @@ export interface RegistrationData {
   lastName: string;
 }
 
+export interface UpdateUserData {
+  username: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   message: string;
@@ -41,6 +47,7 @@ export class AuthService {
   private readonly LOGIN_ENDPOINT = `${this.API_BASE_URL}/auth/login`;
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
   private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
+  private readonly UPDATE_USER_ENDPOINT = `${this.API_BASE_URL}/user/update`;
 
   constructor(private http: HttpClient) {
     this.checkStoredAuth();
@@ -128,6 +135,21 @@ export class AuthService {
       }),
       catchError(error => {
         return throwError(() => error.error || 'User not authenticated');
+      })
+    );
+  }
+
+  updateUser(userData: UpdateUserData): Observable<AuthResponse> {
+    return this.http.put<AuthResponse>(this.UPDATE_USER_ENDPOINT, userData, { headers: this.getAuthHeaders() }).pipe(
+      map((response: AuthResponse) => {
+        if (response.success && response.user) {
+          localStorage.setItem('user_data', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+        return response;
+      }),
+      catchError(error => {
+        return throwError(() => error.error || { success: false, message: 'Update failed.' });
       })
     );
   }
