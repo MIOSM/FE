@@ -22,6 +22,11 @@ export class SettingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      console.log('User not authenticated, redirecting to login...');
+      return;
+    }
+    
     this.initForm();
     this.loadUserData();
   }
@@ -75,7 +80,14 @@ export class SettingsComponent implements OnInit {
         error: (error) => {
           this.isLoading = false;
           this.settingsForm.enable();
-          this.errorMessage = 'An error occurred during update. Please try again.';
+          
+          if (error.status === 401) {
+            console.log('Authentication error, user needs to login again');
+            this.errorMessage = 'Your session has expired. Please login again.';
+            this.authService.logout();
+          } else {
+            this.errorMessage = 'An error occurred during update. Please try again.';
+          }
           console.error('Update error:', error);
         }
       });

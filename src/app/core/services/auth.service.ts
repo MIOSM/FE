@@ -34,6 +34,7 @@ export interface AuthResponse {
   message: string;
   user?: User;
   token?: string;
+  refreshToken?: string;
 }
 
 @Injectable({
@@ -46,6 +47,7 @@ export class AuthService {
   private readonly API_BASE_URL = 'http://localhost:8080';
   private readonly LOGIN_ENDPOINT = `${this.API_BASE_URL}/auth/login`;
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
+  private readonly REFRESH_TOKEN_ENDPOINT = `${this.API_BASE_URL}/auth/refresh`;
   private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
   private readonly UPDATE_USER_ENDPOINT = `${this.API_BASE_URL}/user/update`;
 
@@ -71,6 +73,7 @@ export class AuthService {
       map((response: AuthResponse) => {
         if (response.success && response.token && response.user) {
           localStorage.setItem('access_token', response.token);
+          localStorage.setItem('refresh_token', response.refreshToken || '');
           localStorage.setItem('user_data', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
         }
@@ -87,6 +90,7 @@ export class AuthService {
       map((response: AuthResponse) => {
         if (response.success && response.token && response.user) {
           localStorage.setItem('access_token', response.token);
+          localStorage.setItem('refresh_token', response.refreshToken || '');
           localStorage.setItem('user_data', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
         }
@@ -100,8 +104,32 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_data');
     this.currentUserSubject.next(null);
+  }
+
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) {
+      return throwError(() => ({ success: false, message: 'No refresh token available' }));
+    }
+
+    return this.http.post<AuthResponse>(this.REFRESH_TOKEN_ENDPOINT, { refreshToken }).pipe(
+      map((response: AuthResponse) => {
+        if (response.success && response.token) {
+          localStorage.setItem('access_token', response.token);
+          if (response.refreshToken) {
+            localStorage.setItem('refresh_token', response.refreshToken);
+          }
+        }
+        return response;
+      }),
+      catchError(error => {
+        this.logout(); // Clear invalid tokens
+        return throwError(() => error.error || { success: false, message: 'Token refresh failed' });
+      })
+    );
   }
 
   getAccessToken(): string | null {
@@ -140,7 +168,7 @@ export class AuthService {
   }
 
   updateUser(userData: UpdateUserData): Observable<AuthResponse> {
-    return this.http.put<AuthResponse>(this.UPDATE_USER_ENDPOINT, userData, { headers: this.getAuthHeaders() }).pipe(
+    return this.http.put<AuthResponse>(this.UPDATE_USER_ENDPOINT, userData).pipe(
       map((response: AuthResponse) => {
         if (response.success && response.user) {
           localStorage.setItem('user_data', JSON.stringify(response.user));
