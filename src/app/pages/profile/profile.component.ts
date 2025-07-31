@@ -4,13 +4,13 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
 
 @Component({
-  selector: 'app-user-info',
+  selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './user-info.component.html',
-  styleUrl: './user-info.component.scss'
+  templateUrl: './profile.component.html',
+  styleUrl: './profile.component.scss'
 })
-export class UserInfoComponent implements OnInit {
+export class ProfileComponent implements OnInit {
   currentUser: User | null = null;
 
   constructor(
@@ -30,4 +30,4 @@ export class UserInfoComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-}
+} 

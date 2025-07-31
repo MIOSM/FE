@@ -84,7 +84,7 @@ export class RegistrationComponent implements OnInit {
                 if (loginResponse && loginResponse.success) {
                   this.successMessage = 'Registration and login successful! Redirecting...';
                   setTimeout(() => {
-                    this.router.navigate(['/user-info']);
+                    this.router.navigate(['/profile']);
                   }, 1000);
                 } else {
                   this.errorMessage = loginResponse?.message || 'Login after registration failed. Please try to login manually.';

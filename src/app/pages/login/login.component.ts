@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit {
               localStorage.setItem('user_data', JSON.stringify(response.user));
             }
             setTimeout(() => {
-              this.router.navigate(['/user-info']);
+              this.router.navigate(['/profile']);
             }, 1000);
           } else {
             this.errorMessage = response?.message || 'Login failed. Please try again.';
