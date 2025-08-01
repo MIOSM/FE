@@ -28,25 +28,6 @@
       }
     }
 
-    .user-section {
-      padding: 15px 10px;
-      text-align: center;
-
-      .user-avatar {
-        width: 40px;
-        height: 40px;
-        margin: 0 auto 10px;
-
-        .avatar-text {
-          font-size: 1.2rem;
-        }
-      }
-
-      .user-info {
-        display: none;
-      }
-    }
-
     .sidebar-nav {
       .nav-list {
         .nav-item {
@@ -89,6 +70,29 @@
   .sidebar-header {
     padding: 20px;
     border-bottom: 1px solid var(--border-primary);
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-500);
+        letter-spacing: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
   }
 
   .sidebar-nav {
@@ -101,206 +105,94 @@
 
     .nav-list {
       width: 100%;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      .nav-item {
+        .nav-link {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 15px 20px;
+          color: var(--text-secondary);
+          text-decoration: none;
+          transition: all 0.2s ease;
+          border-left: 3px solid transparent;
+
+          &:hover:not(.disabled) {
+            color: var(--primary-500);
+            background: var(--primary-50);
+            border-left-color: var(--primary-500);
+          }
+
+          &.active {
+            color: var(--primary-500);
+            background: var(--primary-100);
+            border-left-color: var(--primary-500);
+          }
+
+          &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          .nav-icon {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+          }
+
+          .nav-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+          }
+        }
+      }
     }
   }
 
   .sidebar-footer {
     padding: 20px;
     border-top: 1px solid var(--border-primary);
-  }
-}
 
-.user-section {
-  display: none !important;
-}
-
-.sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--border-primary);
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    .logo-img {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-      display: block;
-    }
-
-    .logo-text {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--primary-500);
-      letter-spacing: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-}
-
-.user-section {
-  padding: 20px;
-  border-bottom: 1px solid var(--border-primary);
-  text-align: center;
-
-  .user-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--gradient-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 15px;
-    box-shadow: var(--shadow-md);
-
-    .avatar-text {
-      color: var(--text-inverse);
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-  }
-
-  .user-info {
-    .user-name {
-      color: var(--text-primary);
-      font-size: 1rem;
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--error-50);
+      color: var(--error-600);
+      border: 1px solid var(--error-200);
+      border-radius: 6px;
+      font-size: 0.95rem;
       font-weight: 600;
-      margin: 0 0 5px 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+      cursor: pointer;
+      transition: all 0.2s ease;
 
-    .user-email {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      margin: 0 0 8px 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .user-role {
-      background: rgba(102, 126, 234, 0.08); 
-      color: var(--primary-500);
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 20px 0;
-
-  .nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    .nav-item {
-      margin-bottom: 5px;
-
-      .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 20px;
-        color: var(--text-muted);
-        text-decoration: none;
-        transition: all 0.2s ease;
-        border-left: 3px solid transparent;
-        min-width: 0; 
-
-        &:hover:not(.disabled) {
-          background: var(--primary-50);
-          color: var(--primary-500);
-          border-left-color: var(--primary-500);
-        }
-
-        &.active {
-          background: var(--primary-100);
-          color: var(--primary-500);
-          border-left-color: var(--primary-500);
-        }
-
-        &.disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .nav-icon {
-          font-size: 1.1rem;
-          width: 20px;
-          text-align: center;
-          flex-shrink: 0; 
-        }
-
-        .nav-text {
-          font-size: 0.9rem;
-          font-weight: 500;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          flex: 1;
-          min-width: 0; 
-        }
+      &:hover {
+        background: var(--error-100);
+        color: var(--error-700);
+        border-color: var(--error-300);
       }
-    }
-  }
-}
 
-.sidebar-footer {
-  padding: 20px;
-  border-top: 1px solid var(--border-primary);
+      .logout-icon {
+        font-size: 1rem;
+      }
 
-  .logout-btn {
-    width: 100%;
-    background: var(--error-50);
-    color: var(--error-600);
-    border: 1px solid var(--error-200);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-width: 0; 
-
-    &:hover {
-      background: var(--error-100);
-      border-color: var(--error-400);
-      transform: translateY(-1px);
-    }
-
-    .logout-icon {
-      font-size: 1rem;
-      flex-shrink: 0; 
-    }
-
-    .logout-text {
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-      min-width: 0; 
+      .logout-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
+      }
     }
   }
 }
@@ -389,76 +281,6 @@
 @media (max-width: 980px) {
   .desktop-sidebar {
     width: 60px;
-    
-    .sidebar-header {
-      padding: 15px 10px;
-      text-align: center;
-
-      .logo {
-        justify-content: center;
-        
-        .logo-text {
-          display: none;
-        }
-      }
-    }
-
-    .user-section {
-      padding: 15px 10px;
-      text-align: center;
-
-      .user-avatar {
-        width: 40px;
-        height: 40px;
-        margin: 0 auto 10px;
-
-        .avatar-text {
-          font-size: 1.2rem;
-        }
-      }
-
-      .user-info {
-        display: none;
-      }
-    }
-
-    .sidebar-nav {
-      .nav-list {
-        .nav-item {
-          .nav-link {
-            padding: 12px 10px;
-            justify-content: center;
-
-            .nav-icon {
-              margin: 0;
-              font-size: 1.2rem;
-            }
-
-            .nav-text {
-              display: none;
-            }
-          }
-        }
-      }
-    }
-
-    .sidebar-footer {
-      padding: 15px 10px;
-
-      .logout-btn {
-        padding: 10px;
-        justify-content: center;
-
-        .logout-icon {
-          margin: 0;
-          font-size: 1.2rem;
-        }
-
-        .logout-text {
-          display: none;
-        }
-      }
-    }
   }
 }
 

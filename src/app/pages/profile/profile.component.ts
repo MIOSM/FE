@@ -26,6 +26,10 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  editProfile(): void {
+    this.router.navigate(['/settings']);
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

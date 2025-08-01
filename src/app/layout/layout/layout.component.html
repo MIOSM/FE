@@ -1,9 +1,12 @@
 @if(showSidebar){
-<div class="sidebar">
+<div class="sidebar" [style.width]="sidebarWidth">
   <app-sidebar></app-sidebar>
 </div>
 }
 
-<main class="main-content" [class.no-sidebar]="!showSidebar">
+<main class="main-content" 
+      [class.no-sidebar]="!showSidebar"
+      [style.margin-left]="sidebarWidth"
+      [style.width]="isMobileScreen ? '100%' : 'calc(100% - ' + sidebarWidth + ')'">
   <router-outlet></router-outlet>
 </main>

@@ -1,106 +1,308 @@
-.profile-container {
-  padding: 40px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.user-card {
+// Profile Page Layout
+.profile-page {
+  width: 100%;
   background: var(--bg-primary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-lg);
-  padding: 40px;
-  animation: slideIn 0.6s ease-out;
+  min-height: calc(100vh - 40px); // Account for layout padding
+  overflow-x: hidden; // Prevent horizontal overflow
+  position: relative; // Ensure proper positioning context
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+// Profile Header Section
+.profile-header {
+  position: relative;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+  width: 100%;
+  overflow: hidden; // Prevent content from extending beyond bounds
+}
+
+// Cover Photo
+.cover-photo {
+  height: 200px;
+  background: linear-gradient(135deg, var(--primary-400), var(--primary-600));
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+
+  .cover-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    font-weight: 500;
+
+    i {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    span {
+      font-size: 1rem;
+    }
   }
 }
 
-.user-header {
-  text-align: center;
-  margin-bottom: 40px;
+// Profile Info Section
+.profile-info {
+  padding: 0 20px 20px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
 
-  .user-avatar {
-    width: 80px;
-    height: 80px;
+// Profile Picture
+.profile-picture {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: -60px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .avatar-container {
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    background: var(--primary-400);
+    background: var(--primary-500);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
-    box-shadow: var(--shadow-md);
+    border: 4px solid var(--bg-primary);
+    box-shadow: var(--shadow-lg);
 
     .avatar-text {
       color: var(--text-inverse);
-      font-size: 2rem;
+      font-size: 3rem;
       font-weight: 700;
     }
   }
 
-  h1 {
+  .edit-profile-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
     color: var(--text-primary);
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  .user-role {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    margin: 0;
-    font-weight: 500;
-  }
-}
-
-.user-details {
-  margin-bottom: 40px;
-
-  .detail-item {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border-primary);
+    gap: 6px;
 
-    &:last-child {
-      border-bottom: none;
+    &:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-secondary);
     }
 
-    label {
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    span {
-      color: var(--text-primary);
-      font-weight: 500;
-      font-size: 1rem;
-    }
-
-    .role-badge {
-      background: var(--gradient-primary);
-      color: var(--text-inverse);
-      padding: 6px 12px;
-      border-radius: 20px;
+    i {
       font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
   }
 }
 
+// User Details
+.user-details {
+  width: 100%;
+  box-sizing: border-box;
+  
+  .user-name {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+  }
+
+  .user-username {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0 0 16px 0;
+  }
+
+  .user-bio {
+    margin-bottom: 20px;
+
+    p {
+      color: var(--text-primary);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+  }
+
+  .user-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--primary-500);
+      }
+
+      .stat-number {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .user-contact {
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+
+      i {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Navigation Tabs
+.profile-nav {
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  width: 100%;
+
+  .nav-tabs {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+
+    .nav-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 16px 12px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+
+      &:hover {
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+      }
+
+      &.active {
+        color: var(--primary-500);
+        font-weight: 600;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: var(--primary-500);
+        }
+      }
+
+      i {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Content Area
+.profile-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+
+// Posts Section
+.posts-section {
+  width: 100%;
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+
+    .empty-icon {
+      margin-bottom: 20px;
+
+      i {
+        font-size: 3rem;
+        color: var(--text-muted);
+      }
+    }
+
+    h3 {
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 1rem;
+      margin: 0 0 24px 0;
+      line-height: 1.5;
+    }
+
+    .create-post-btn {
+      background: var(--primary-500);
+      color: var(--text-inverse);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      &:hover {
+        background: var(--primary-600);
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Loading State
 .loading-container {
   text-align: center;
   padding: 60px 20px;
@@ -126,26 +328,131 @@
   100% { transform: rotate(360deg); }
 }
 
+// Responsive Design
 @media (max-width: 768px) {
-  .profile-container {
-    padding: 20px;
+  .profile-page {
+    min-height: calc(100vh - 80px); // Account for mobile layout
+    overflow-x: visible; // Allow overflow on mobile since sidebar is hidden
   }
 
-  .user-card {
-    padding: 30px 20px;
+  .profile-info {
+    padding: 0 16px 16px;
   }
 
-  .user-header h1 {
-    font-size: 1.75rem;
-  }
+  .profile-picture {
+    margin-top: -50px;
 
-  .user-details .detail-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    .avatar-container {
+      width: 100px;
+      height: 100px;
 
-    label {
+      .avatar-text {
+        font-size: 2.5rem;
+      }
+    }
+
+    .edit-profile-btn {
+      padding: 6px 12px;
       font-size: 0.8rem;
+    }
+  }
+
+  .user-details {
+    .user-name {
+      font-size: 1.3rem;
+    }
+
+    .user-stats {
+      gap: 16px;
+
+      .stat-item {
+        .stat-number {
+          font-size: 0.9rem;
+        }
+
+        .stat-label {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+
+  .profile-nav {
+    .nav-tabs {
+      .nav-tab {
+        padding: 12px 8px;
+        font-size: 0.8rem;
+
+        span {
+          display: none;
+        }
+
+        i {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+
+  .profile-content {
+    padding: 16px 0;
+  }
+
+  .posts-section {
+    .empty-state {
+      padding: 40px 16px;
+
+      .empty-icon i {
+        font-size: 2.5rem;
+      }
+
+      h3 {
+        font-size: 1.3rem;
+      }
+
+      .create-post-btn {
+        padding: 10px 20px;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Desktop specific fixes to prevent sidebar overlap
+@media (min-width: 769px) {
+  .profile-page {
+    width: 100%; // Let layout component handle positioning
+  }
+}
+
+@media (min-width: 769px) and (max-width: 980px) {
+  .profile-page {
+    width: 100%; // Let layout component handle positioning
+  }
+}
+
+@media (max-width: 480px) {
+  .cover-photo {
+    height: 150px;
+  }
+
+  .profile-picture {
+    margin-top: -40px;
+
+    .avatar-container {
+      width: 80px;
+      height: 80px;
+
+      .avatar-text {
+        font-size: 2rem;
+      }
+    }
+  }
+
+  .user-details {
+    .user-stats {
+      flex-direction: column;
+      gap: 8px;
     }
   }
 } 

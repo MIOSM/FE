@@ -1,33 +1,100 @@
-<div class="profile-container">
-  <div *ngIf="currentUser" class="user-card">
-    <div class="user-header">
-      <div class="user-avatar">
-        <span class="avatar-text">{{ currentUser.firstName.charAt(0) }}</span>
-      </div>
-      <h1>Welcome, {{ currentUser.firstName }} {{ currentUser.lastName }}!</h1>
-    </div>
-
-    <div class="user-details">
-      <div class="detail-item">
-        <label>Username</label>
-        <span>{{ currentUser.username }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Email Address</label>
-        <span>{{ currentUser.email }}</span>
-      </div>
-      <div class="detail-item">
-        <label>First Name</label>
-        <span>{{ currentUser.firstName }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Last Name</label>
-        <span>{{ currentUser.lastName }}</span>
+<div class="profile-page" *ngIf="currentUser">
+  <!-- Profile Header Section -->
+  <div class="profile-header">
+    <!-- Cover Photo -->
+    <div class="cover-photo">
+      <div class="cover-placeholder">
+        <i class="fas fa-image"></i>
+        <span>Cover Photo</span>
       </div>
     </div>
-
-  <div *ngIf="!currentUser" class="loading-container">
-    <div class="spinner"></div>
-    <p>Loading user information...</p>
+    
+    <!-- Profile Info Section -->
+    <div class="profile-info">
+      <!-- Profile Picture -->
+      <div class="profile-picture">
+        <div class="avatar-container">
+          <span class="avatar-text">{{ currentUser.firstName.charAt(0) }}</span>
+        </div>
+        <button class="edit-profile-btn" (click)="editProfile()">
+          <i class="fas fa-edit"></i>
+          Edit Profile
+        </button>
+      </div>
+      
+      <!-- User Details -->
+      <div class="user-details">
+        <h1 class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</h1>
+        <p class="user-username">&#64;{{ currentUser.username }}</p>
+        
+        <div class="user-bio">
+          <p>This is a sample bio. You can edit this to tell people about yourself.</p>
+        </div>
+        
+        <div class="user-stats">
+          <div class="stat-item">
+            <span class="stat-number">0</span>
+            <span class="stat-label">Following</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">0</span>
+            <span class="stat-label">Followers</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">0</span>
+            <span class="stat-label">Posts</span>
+          </div>
+        </div>
+        
+        <div class="user-contact">
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>{{ currentUser.email }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Navigation Tabs -->
+  <div class="profile-nav">
+    <div class="nav-tabs">
+      <button class="nav-tab active">
+        <i class="fas fa-list"></i>
+        <span>Posts</span>
+      </button>
+      <button class="nav-tab">
+        <i class="fas fa-heart"></i>
+        <span>Likes</span>
+      </button>
+      <button class="nav-tab">
+        <i class="fas fa-bookmark"></i>
+        <span>Bookmarks</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="profile-content">
+    <!-- Posts Section -->
+    <div class="posts-section">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-feather-alt"></i>
+        </div>
+        <h3>No posts yet</h3>
+        <p>When you create posts, they'll show up here.</p>
+        <button class="create-post-btn">
+          <i class="fas fa-plus"></i>
+          Create your first post
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="!currentUser">
+  <div class="spinner"></div>
+  <p>Loading user information...</p>
 </div> 
