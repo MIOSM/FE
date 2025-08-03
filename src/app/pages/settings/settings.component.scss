@@ -1,18 +1,18 @@
-h2 {
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-  font-size: 1.8rem;
-  font-weight: 600;
+.help-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  font-style: italic;
 }
 
-.description {
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-  font-size: 0.95rem;
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
 }
 
-@media (max-width: 768px) {
-  h2 {
-    font-size: 1.5rem;
-  }
+.settings-card {
+  background: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
 }

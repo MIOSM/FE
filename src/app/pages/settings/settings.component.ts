@@ -35,7 +35,10 @@ export class SettingsComponent implements OnInit {
     this.settingsForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(2)]],
       firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]]
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      avatar: [''],
+      coverPhoto: [''],
+      bio: ['']
     });
   }
 
@@ -45,7 +48,10 @@ export class SettingsComponent implements OnInit {
       this.settingsForm.patchValue({
         username: currentUser.username,
         firstName: currentUser.firstName,
-        lastName: currentUser.lastName
+        lastName: currentUser.lastName,
+        avatar: currentUser.avatar || '',
+        coverPhoto: currentUser.coverPhoto || '',
+        bio: currentUser.bio || ''
       });
     }
   }
@@ -61,7 +67,10 @@ export class SettingsComponent implements OnInit {
       const userData: UpdateUserData = {
         username: this.settingsForm.get('username')?.value,
         firstName: this.settingsForm.get('firstName')?.value,
-        lastName: this.settingsForm.get('lastName')?.value
+        lastName: this.settingsForm.get('lastName')?.value,
+        avatar: this.settingsForm.get('avatar')?.value,
+        coverPhoto: this.settingsForm.get('coverPhoto')?.value,
+        bio: this.settingsForm.get('bio')?.value
       };
 
       this.authService.updateUser(userData).subscribe({

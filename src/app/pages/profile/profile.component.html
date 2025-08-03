@@ -1,34 +1,26 @@
 <div class="profile-page" *ngIf="currentUser">
-  <!-- Profile Header Section -->
   <div class="profile-header">
-    <!-- Cover Photo -->
     <div class="cover-photo">
-      <div class="cover-placeholder">
-        <i class="fas fa-image"></i>
-        <span>Cover Photo</span>
-      </div>
+      <img [src]="userCoverPhoto" alt="Cover Photo" class="cover-image" />
     </div>
-    
-    <!-- Profile Info Section -->
+
     <div class="profile-info">
-      <!-- Profile Picture -->
       <div class="profile-picture">
         <div class="avatar-container">
-          <span class="avatar-text">{{ currentUser.firstName.charAt(0) }}</span>
+          <img [src]="userAvatar" alt="Profile Picture" class="avatar-image" />
         </div>
         <button class="edit-profile-btn" (click)="editProfile()">
           <i class="fas fa-edit"></i>
           Edit Profile
         </button>
       </div>
-      
-      <!-- User Details -->
+
       <div class="user-details">
         <h1 class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</h1>
         <p class="user-username">&#64;{{ currentUser.username }}</p>
         
         <div class="user-bio">
-          <p>This is a sample bio. You can edit this to tell people about yourself.</p>
+          <p>{{ userBio }}</p>
         </div>
         
         <div class="user-stats">
@@ -56,7 +48,6 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs -->
   <div class="profile-nav">
     <div class="nav-tabs">
       <button class="nav-tab active">
@@ -74,9 +65,7 @@
     </div>
   </div>
 
-  <!-- Content Area -->
   <div class="profile-content">
-    <!-- Posts Section -->
     <div class="posts-section">
       <div class="empty-state">
         <div class="empty-icon">
@@ -93,7 +82,6 @@
   </div>
 </div>
 
-<!-- Loading State -->
 <div class="loading-container" *ngIf="!currentUser">
   <div class="spinner"></div>
   <p>Loading user information...</p>

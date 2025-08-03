@@ -49,6 +49,42 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label for="avatar" class="form-label">Avatar URL</label>
+        <input
+          type="url"
+          id="avatar"
+          formControlName="avatar"
+          class="form-control"
+          placeholder="Enter avatar image URL"
+        />
+        <div class="help-text">Enter a URL for your profile picture</div>
+      </div>
+
+      <div class="form-group">
+        <label for="coverPhoto" class="form-label">Cover Photo URL</label>
+        <input
+          type="url"
+          id="coverPhoto"
+          formControlName="coverPhoto"
+          class="form-control"
+          placeholder="Enter cover photo URL"
+        />
+        <div class="help-text">Enter a URL for your cover photo</div>
+      </div>
+
+      <div class="form-group">
+        <label for="bio" class="form-label">Bio</label>
+        <textarea
+          id="bio"
+          formControlName="bio"
+          class="form-control"
+          rows="4"
+          placeholder="Tell people about yourself..."
+        ></textarea>
+        <div class="help-text">Write a short bio about yourself</div>
+      </div>
+
       <div class="message-container">
         <div class="success-message" *ngIf="successMessage">
           {{ successMessage }}

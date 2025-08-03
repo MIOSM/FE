@@ -8,6 +8,9 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  avatar?: string;
+  coverPhoto?: string;
+  bio?: string;
 }
 
 export interface LoginCredentials {
@@ -27,6 +30,9 @@ export interface UpdateUserData {
   username: string;
   firstName: string;
   lastName: string;
+  avatar?: string;
+  coverPhoto?: string;
+  bio?: string;
 }
 
 export interface AuthResponse {
@@ -126,7 +132,7 @@ export class AuthService {
         return response;
       }),
       catchError(error => {
-        this.logout(); // Clear invalid tokens
+        this.logout(); 
         return throwError(() => error.error || { success: false, message: 'Token refresh failed' });
       })
     );

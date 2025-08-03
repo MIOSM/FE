@@ -1,22 +1,19 @@
-// Profile Page Layout
 .profile-page {
   width: 100%;
   background: var(--bg-primary);
-  min-height: calc(100vh - 40px); // Account for layout padding
-  overflow-x: hidden; // Prevent horizontal overflow
-  position: relative; // Ensure proper positioning context
+  min-height: calc(100vh - 40px);
+  overflow-x: hidden;
+  position: relative;
 }
 
-// Profile Header Section
 .profile-header {
   position: relative;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-primary);
   width: 100%;
-  overflow: hidden; // Prevent content from extending beyond bounds
+  overflow: hidden; 
 }
 
-// Cover Photo
 .cover-photo {
   height: 200px;
   background: linear-gradient(135deg, var(--primary-400), var(--primary-600));
@@ -24,6 +21,13 @@
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
+
+  .cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
 
   .cover-placeholder {
     display: flex;
@@ -47,7 +51,6 @@
   }
 }
 
-// Profile Info Section
 .profile-info {
   padding: 0 20px 20px;
   position: relative;
@@ -55,7 +58,6 @@
   box-sizing: border-box;
 }
 
-// Profile Picture
 .profile-picture {
   display: flex;
   justify-content: space-between;
@@ -75,6 +77,14 @@
     justify-content: center;
     border: 4px solid var(--bg-primary);
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
+
+    .avatar-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
 
     .avatar-text {
       color: var(--text-inverse);
@@ -108,7 +118,6 @@
   }
 }
 
-// User Details
 .user-details {
   width: 100%;
   box-sizing: border-box;
@@ -181,7 +190,6 @@
   }
 }
 
-// Navigation Tabs
 .profile-nav {
   border-bottom: 1px solid var(--border-primary);
   background: var(--bg-primary);
@@ -236,7 +244,6 @@
   }
 }
 
-// Content Area
 .profile-content {
   width: 100%;
   max-width: 100%;
@@ -245,7 +252,6 @@
   box-sizing: border-box;
 }
 
-// Posts Section
 .posts-section {
   width: 100%;
   
@@ -302,7 +308,6 @@
   }
 }
 
-// Loading State
 .loading-container {
   text-align: center;
   padding: 60px 20px;
@@ -328,11 +333,10 @@
   100% { transform: rotate(360deg); }
 }
 
-// Responsive Design
 @media (max-width: 768px) {
   .profile-page {
-    min-height: calc(100vh - 80px); // Account for mobile layout
-    overflow-x: visible; // Allow overflow on mobile since sidebar is hidden
+    min-height: calc(100vh - 80px);
+    overflow-x: visible; 
   }
 
   .profile-info {
@@ -418,16 +422,15 @@
   }
 }
 
-// Desktop specific fixes to prevent sidebar overlap
 @media (min-width: 769px) {
   .profile-page {
-    width: 100%; // Let layout component handle positioning
+    width: 100%; 
   }
 }
 
 @media (min-width: 769px) and (max-width: 980px) {
   .profile-page {
-    width: 100%; // Let layout component handle positioning
+    width: 100%; 
   }
 }
 
