@@ -1,0 +1,81 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ title }}</h3>
+      <button class="close-btn" (click)="onCancel()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="current-image" *ngIf="currentImageUrl">
+        <h4>Current Image</h4>
+        <img [src]="currentImageUrl" alt="Current image" class="current-preview">
+      </div>
+
+      <div class="upload-section">
+        <h4>Upload New Image</h4>
+        
+        <div 
+          class="upload-area"
+          [class.drag-over]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()"
+        >
+          <div class="upload-content">
+            <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7,10 12,15 17,10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <p class="upload-text">Drag and drop an image here, or click to browse</p>
+            <p class="upload-hint">Supports: JPG, PNG, GIF, WebP</p>
+          </div>
+        </div>
+
+        <input 
+          #fileInput
+          type="file" 
+          accept="image/*" 
+          (change)="onFileSelected($event)"
+          style="display: none;"
+        >
+
+        <button class="browse-btn" (click)="fileInput.click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Browse Files
+        </button>
+      </div>
+
+      <div class="preview-section" *ngIf="previewUrl">
+        <h4>Preview</h4>
+        <div class="preview-container">
+          <img [src]="previewUrl" alt="Preview" class="preview-image">
+          <div class="file-info">
+            <p><strong>File:</strong> {{ selectedFile?.name }}</p>
+            <p><strong>Size:</strong> {{ (selectedFile?.size || 0) | number:'1.0-0' }} bytes</p>
+            <p><strong>Type:</strong> {{ selectedFile?.type }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+      <button 
+        class="btn btn-primary" 
+        [disabled]="!selectedFile"
+        (click)="onUpload()"
+      >
+        Upload Image
+      </button>
+    </div>
+  </div>
+</div> 

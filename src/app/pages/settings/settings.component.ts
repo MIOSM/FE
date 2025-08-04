@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService, UpdateUserData } from '../../core/services/auth.service';
+import { ImageUploadModalComponent } from '../../shared/components/image-upload-modal/image-upload-modal.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ImageUploadModalComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
@@ -15,6 +16,11 @@ export class SettingsComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
+
+  showAvatarModal = false;
+  showCoverModal = false;
+  avatarFile: File | null = null;
+  coverFile: File | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +70,24 @@ export class SettingsComponent implements OnInit {
 
       this.settingsForm.disable();
 
+      const formData = new FormData();
+      formData.append('username', this.settingsForm.get('username')?.value);
+      formData.append('firstName', this.settingsForm.get('firstName')?.value);
+      formData.append('lastName', this.settingsForm.get('lastName')?.value);
+      formData.append('bio', this.settingsForm.get('bio')?.value);
+
+      if (this.avatarFile) {
+        formData.append('avatar', this.avatarFile);
+      } else {
+        formData.append('avatar', this.settingsForm.get('avatar')?.value || '');
+      }
+
+      if (this.coverFile) {
+        formData.append('coverPhoto', this.coverFile);
+      } else {
+        formData.append('coverPhoto', this.settingsForm.get('coverPhoto')?.value || '');
+      }
+
       const userData: UpdateUserData = {
         username: this.settingsForm.get('username')?.value,
         firstName: this.settingsForm.get('firstName')?.value,
@@ -79,6 +103,8 @@ export class SettingsComponent implements OnInit {
           this.settingsForm.enable();
           if (response && response.success) {
             this.successMessage = response.message || 'Profile updated successfully!';
+            this.avatarFile = null;
+            this.coverFile = null;
             setTimeout(() => {
               this.successMessage = '';
             }, 3000);
@@ -130,5 +156,56 @@ export class SettingsComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.settingsForm.get(fieldName);
     return !!(field && field.invalid && field.touched);
+  }
+
+  openAvatarModal(): void {
+    this.showAvatarModal = true;
+  }
+
+  openCoverModal(): void {
+    this.showCoverModal = true;
+  }
+
+  onAvatarSelected(file: File): void {
+    this.avatarFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewUrl = e.target?.result as string;
+      this.settingsForm.patchValue({ avatar: previewUrl });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  onCoverSelected(file: File): void {
+    this.coverFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewUrl = e.target?.result as string;
+      this.settingsForm.patchValue({ coverPhoto: previewUrl });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  closeAvatarModal(): void {
+    this.showAvatarModal = false;
+  }
+
+  closeCoverModal(): void {
+    this.showCoverModal = false;
+  }
+
+  getCurrentAvatarUrl(): string {
+    return this.settingsForm.get('avatar')?.value || '';
+  }
+
+  getCurrentCoverUrl(): string {
+    return this.settingsForm.get('coverPhoto')?.value || '';
+  }
+
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/default-avatar.png';
+    }
   }
 }
