@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -10,12 +11,12 @@ import { AuthService, User } from '../../core/services/auth.service';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
+  private userSubscription: Subscription = new Subscription();
 
   userAvatar: string = 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD';
   userCoverPhoto: string = 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo';
-  userBio: string = 'This is a sample bio. You can edit this to tell people about yourself.';
 
   constructor(
     private authService: AuthService,
@@ -23,21 +24,25 @@ export class ProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
+    // Подписываемся на изменения пользователя в реальном времени
+    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      if (!this.currentUser) {
+        this.router.navigate(['/login']);
+      } else {
+        this.loadUserProfileData();
+      }
+    });
+  }
 
-    if (!this.currentUser) {
-      this.router.navigate(['/login']);
-    }
-    
-    this.loadUserProfileData();
+  ngOnDestroy(): void {
+    this.userSubscription.unsubscribe();
   }
 
   private loadUserProfileData(): void {
     if (this.currentUser) {
-      // Will override template data with backend data when available
       this.userAvatar = this.currentUser.avatar || this.userAvatar;
       this.userCoverPhoto = this.currentUser.coverPhoto || this.userCoverPhoto;
-      this.userBio = this.currentUser.bio || this.userBio;
     }
   }
 
@@ -49,4 +54,4 @@ export class ProfileComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-} 
+}

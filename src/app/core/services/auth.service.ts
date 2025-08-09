@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 export interface User {
   username: string;
@@ -30,8 +30,6 @@ export interface UpdateUserData {
   username: string;
   firstName: string;
   lastName: string;
-  avatar?: string;
-  coverPhoto?: string;
   bio?: string;
 }
 
@@ -55,7 +53,9 @@ export class AuthService {
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
   private readonly REFRESH_TOKEN_ENDPOINT = `${this.API_BASE_URL}/auth/refresh`;
   private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
-  private readonly UPDATE_USER_ENDPOINT = `${this.API_BASE_URL}/user/update`;
+  private readonly UPDATE_USER_ENDPOINT = `${this.API_BASE_URL}/auth/update`;
+  private readonly UPLOAD_AVATAR_ENDPOINT = `${this.API_BASE_URL}/auth/upload-avatar`;
+  private readonly UPLOAD_COVER_ENDPOINT = `${this.API_BASE_URL}/auth/upload-cover`;
 
   constructor(private http: HttpClient) {
     this.checkStoredAuth();
@@ -153,10 +153,19 @@ export class AuthService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.getAccessToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : ''
-    });
+    console.log('Creating headers with token:', token ? token.substring(0, 20) + '...' : 'null');
+    
+    const headers = new HttpHeaders();
+    headers.set('Content-Type', 'application/json');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    return headers;
+  }
+
+  setCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
   }
 
   getUserProfile(): Observable<User> {
@@ -174,7 +183,10 @@ export class AuthService {
   }
 
   updateUser(userData: UpdateUserData): Observable<AuthResponse> {
-    return this.http.put<AuthResponse>(this.UPDATE_USER_ENDPOINT, userData).pipe(
+    const token = this.getAccessToken();
+    const headers = this.getAuthHeaders();
+    
+    return this.http.patch<AuthResponse>(this.UPDATE_USER_ENDPOINT, userData, { headers }).pipe(
       map((response: AuthResponse) => {
         if (response.success && response.user) {
           localStorage.setItem('user_data', JSON.stringify(response.user));
@@ -183,7 +195,123 @@ export class AuthService {
         return response;
       }),
       catchError(error => {
+        console.error('Update user error:', error);
+
+        if (error.status === 401) {
+          console.log('Token expired, attempting to refresh...');
+          return this.refreshToken().pipe(
+            switchMap(() => {
+              const newHeaders = this.getAuthHeaders();
+              return this.http.patch<AuthResponse>(this.UPDATE_USER_ENDPOINT, userData, { headers: newHeaders });
+            }),
+            map((response: AuthResponse) => {
+              if (response.success && response.user) {
+                localStorage.setItem('user_data', JSON.stringify(response.user));
+                this.currentUserSubject.next(response.user);
+              }
+              return response;
+            }),
+            catchError(refreshError => {
+              console.error('Token refresh failed:', refreshError);
+              this.logout(); 
+              return throwError(() => ({ success: false, message: 'Authentication failed. Please login again.' }));
+            })
+          );
+        }
+        
         return throwError(() => error.error || { success: false, message: 'Update failed.' });
+      })
+    );
+  }
+
+  uploadAvatar(file: File): Observable<AuthResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const headers = this.getAuthHeaders();
+    headers.delete('Content-Type');
+    
+    return this.http.post<AuthResponse>(this.UPLOAD_AVATAR_ENDPOINT, formData, { headers }).pipe(
+      map((response: AuthResponse) => {
+        if (response.success && response.user) {
+          localStorage.setItem('user_data', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Avatar upload error:', error);
+
+        if (error.status === 401) {
+          console.log('Token expired during avatar upload, attempting to refresh...');
+          return this.refreshToken().pipe(
+            switchMap(() => {
+              const newHeaders = this.getAuthHeaders();
+              newHeaders.delete('Content-Type');
+              return this.http.post<AuthResponse>(this.UPLOAD_AVATAR_ENDPOINT, formData, { headers: newHeaders });
+            }),
+            map((response: AuthResponse) => {
+              if (response.success && response.user) {
+                localStorage.setItem('user_data', JSON.stringify(response.user));
+                this.currentUserSubject.next(response.user);
+              }
+              return response;
+            }),
+            catchError(refreshError => {
+              console.error('Token refresh failed during avatar upload:', refreshError);
+              this.logout();
+              return throwError(() => ({ success: false, message: 'Authentication failed. Please login again.' }));
+            })
+          );
+        }
+        
+        return throwError(() => error.error || { success: false, message: 'Avatar upload failed.' });
+      })
+    );
+  }
+
+  uploadCover(file: File): Observable<AuthResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const headers = this.getAuthHeaders();
+    headers.delete('Content-Type');
+    
+    return this.http.post<AuthResponse>(this.UPLOAD_COVER_ENDPOINT, formData, { headers }).pipe(
+      map((response: AuthResponse) => {
+        if (response.success && response.user) {
+          localStorage.setItem('user_data', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Cover upload error:', error);
+
+        if (error.status === 401) {
+          console.log('Token expired during cover upload, attempting to refresh...');
+          return this.refreshToken().pipe(
+            switchMap(() => {
+              const newHeaders = this.getAuthHeaders();
+              newHeaders.delete('Content-Type');
+              return this.http.post<AuthResponse>(this.UPLOAD_COVER_ENDPOINT, formData, { headers: newHeaders });
+            }),
+            map((response: AuthResponse) => {
+              if (response.success && response.user) {
+                localStorage.setItem('user_data', JSON.stringify(response.user));
+                this.currentUserSubject.next(response.user);
+              }
+              return response;
+            }),
+            catchError(refreshError => {
+              console.error('Token refresh failed during cover upload:', refreshError);
+              this.logout();
+              return throwError(() => ({ success: false, message: 'Authentication failed. Please login again.' }));
+            })
+          );
+        }
+        
+        return throwError(() => error.error || { success: false, message: 'Cover upload failed.' });
       })
     );
   }

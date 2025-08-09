@@ -70,64 +70,138 @@ export class SettingsComponent implements OnInit {
 
       this.settingsForm.disable();
 
-      const formData = new FormData();
-      formData.append('username', this.settingsForm.get('username')?.value);
-      formData.append('firstName', this.settingsForm.get('firstName')?.value);
-      formData.append('lastName', this.settingsForm.get('lastName')?.value);
-      formData.append('bio', this.settingsForm.get('bio')?.value);
-
-      if (this.avatarFile) {
-        formData.append('avatar', this.avatarFile);
-      } else {
-        formData.append('avatar', this.settingsForm.get('avatar')?.value || '');
-      }
-
-      if (this.coverFile) {
-        formData.append('coverPhoto', this.coverFile);
-      } else {
-        formData.append('coverPhoto', this.settingsForm.get('coverPhoto')?.value || '');
-      }
-
       const userData: UpdateUserData = {
         username: this.settingsForm.get('username')?.value,
         firstName: this.settingsForm.get('firstName')?.value,
         lastName: this.settingsForm.get('lastName')?.value,
-        avatar: this.settingsForm.get('avatar')?.value,
-        coverPhoto: this.settingsForm.get('coverPhoto')?.value,
         bio: this.settingsForm.get('bio')?.value
       };
 
       this.authService.updateUser(userData).subscribe({
         next: (response) => {
-          this.isLoading = false;
-          this.settingsForm.enable();
           if (response && response.success) {
-            this.successMessage = response.message || 'Profile updated successfully!';
-            this.avatarFile = null;
-            this.coverFile = null;
-            setTimeout(() => {
-              this.successMessage = '';
-            }, 3000);
+            this.successMessage = 'Profile information updated successfully!';
+            
+            // 🔹 Обновляем пользователя в AuthService
+            if (response.user) {
+              this.authService.setCurrentUser(response.user);
+              this.settingsForm.patchValue({
+                username: response.user.username,
+                firstName: response.user.firstName,
+                lastName: response.user.lastName,
+                bio: response.user.bio || ''
+              });
+            }
+            
+            this.handleImageUploads();
           } else {
+            this.isLoading = false;
+            this.settingsForm.enable();
             this.errorMessage = response?.message || 'Update failed. Please try again.';
           }
         },
         error: (error) => {
           this.isLoading = false;
           this.settingsForm.enable();
-          
-          if (error.status === 401) {
-            console.log('Authentication error, user needs to login again');
-            this.errorMessage = 'Your session has expired. Please login again.';
-            this.authService.logout();
-          } else {
-            this.errorMessage = 'An error occurred during update. Please try again.';
-          }
+          this.errorMessage = 'An error occurred during update. Please try again.';
           console.error('Update error:', error);
         }
       });
     } else {
       this.markFormGroupTouched();
+    }
+  }
+
+  private handleImageUploads(): void {
+    let uploadCount = 0;
+    let completedUploads = 0;
+    let hasErrors = false;
+
+    // Count how many uploads we need to do
+    if (this.avatarFile) uploadCount++;
+    if (this.coverFile) uploadCount++;
+
+    if (uploadCount === 0) {
+      // No images to upload, we're done
+      this.isLoading = false;
+      this.settingsForm.enable();
+      this.avatarFile = null;
+      this.coverFile = null;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
+      return;
+    }
+
+    const checkCompletion = () => {
+      completedUploads++;
+      if (completedUploads === uploadCount) {
+        this.isLoading = false;
+        this.settingsForm.enable();
+        this.avatarFile = null;
+        this.coverFile = null;
+        
+        if (hasErrors) {
+          this.errorMessage = 'Some images failed to upload. Please try again.';
+        } else {
+          this.successMessage = 'Profile updated successfully!';
+          setTimeout(() => {
+            this.successMessage = '';
+          }, 3000);
+        }
+      }
+    };
+
+    // Upload avatar if selected
+    if (this.avatarFile) {
+      this.authService.uploadAvatar(this.avatarFile).subscribe({
+        next: (response) => {
+          if (response && response.success) {
+            console.log('Avatar uploaded successfully');
+            // Обновляем данные пользователя если они есть в ответе
+            if (response.user) {
+              this.settingsForm.patchValue({
+                avatar: response.user.avatar || ''
+              });
+            }
+          } else {
+            hasErrors = true;
+            console.error('Avatar upload failed:', response?.message);
+          }
+          checkCompletion();
+        },
+        error: (error) => {
+          hasErrors = true;
+          console.error('Avatar upload error:', error);
+          checkCompletion();
+        }
+      });
+    }
+
+    // Upload cover if selected
+    if (this.coverFile) {
+      this.authService.uploadCover(this.coverFile).subscribe({
+        next: (response) => {
+          if (response && response.success) {
+            console.log('Cover uploaded successfully');
+            // Обновляем данные пользователя если они есть в ответе
+            if (response.user) {
+              this.settingsForm.patchValue({
+                coverPhoto: response.user.coverPhoto || ''
+              });
+            }
+          } else {
+            hasErrors = true;
+            console.error('Cover upload failed:', response?.message);
+          }
+          checkCompletion();
+        },
+        error: (error) => {
+          hasErrors = true;
+          console.error('Cover upload error:', error);
+          checkCompletion();
+        }
+      });
     }
   }
 
