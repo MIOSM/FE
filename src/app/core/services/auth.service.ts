@@ -39,6 +39,8 @@ export interface AuthResponse {
   user?: User;
   token?: string;
   refreshToken?: string;
+  avatarUrl?: string;
+  coverUrl?: string;
 }
 
 @Injectable({
@@ -49,13 +51,14 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly API_BASE_URL = 'http://localhost:8080';
+  private readonly AUTH_SERVICE_URL = 'http://localhost:8081'; // Direct auth-service URL for file uploads
   private readonly LOGIN_ENDPOINT = `${this.API_BASE_URL}/auth/login`;
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
   private readonly REFRESH_TOKEN_ENDPOINT = `${this.API_BASE_URL}/auth/refresh`;
   private readonly USER_PROFILE_ENDPOINT = `${this.API_BASE_URL}/user/profile`;
   private readonly UPDATE_USER_ENDPOINT = `${this.API_BASE_URL}/auth/update`;
-  private readonly UPLOAD_AVATAR_ENDPOINT = `${this.API_BASE_URL}/auth/upload-avatar`;
-  private readonly UPLOAD_COVER_ENDPOINT = `${this.API_BASE_URL}/auth/upload-cover`;
+  private readonly UPLOAD_AVATAR_ENDPOINT = `${this.AUTH_SERVICE_URL}/auth/upload-avatar`;
+  private readonly UPLOAD_COVER_ENDPOINT = `${this.AUTH_SERVICE_URL}/auth/upload-cover`;
 
   constructor(private http: HttpClient) {
     this.checkStoredAuth();
@@ -64,13 +67,23 @@ export class AuthService {
   private checkStoredAuth(): void {
     const token = localStorage.getItem('access_token');
     const userData = localStorage.getItem('user_data');
+    
+    console.log('AuthService: Checking stored auth');
+    console.log('AuthService: Token exists:', !!token);
+    console.log('AuthService: User data from localStorage:', userData);
+    
     if (token && userData) {
       try {
         const user = JSON.parse(userData);
+        console.log('AuthService: Parsed user from localStorage:', user);
         this.currentUserSubject.next(user);
+        console.log('AuthService: User loaded from localStorage');
       } catch (error) {
+        console.log('AuthService: Error parsing user data, logging out');
         this.logout();
       }
+    } else {
+      console.log('AuthService: No stored auth data found');
     }
   }
 
@@ -155,17 +168,33 @@ export class AuthService {
     const token = this.getAccessToken();
     console.log('Creating headers with token:', token ? token.substring(0, 20) + '...' : 'null');
     
-    const headers = new HttpHeaders();
-    headers.set('Content-Type', 'application/json');
+    let headers = new HttpHeaders();
+    headers = headers.set('Content-Type', 'application/json');
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    return headers;
+  }
+
+  private getAuthHeadersForFileUpload(): HttpHeaders {
+    const token = this.getAccessToken();
+    console.log('Creating headers with token:', token ? token.substring(0, 20) + '...' : 'null');
+    
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
     }
     
     return headers;
   }
 
   setCurrentUser(user: User): void {
+    console.log('🔍 AuthService: Setting current user:', user);
     this.currentUserSubject.next(user);
+    localStorage.setItem('user_data', JSON.stringify(user));
+    console.log('🔍 AuthService: User data saved to localStorage');
+    console.log('🔍 AuthService: Current user subject updated');
   }
 
   getUserProfile(): Observable<User> {
@@ -197,8 +226,8 @@ export class AuthService {
       catchError(error => {
         console.error('Update user error:', error);
 
-        if (error.status === 401) {
-          console.log('Token expired, attempting to refresh...');
+        if (error.status === 401 || (error.status === 400 && error.error?.message?.includes('JWT'))) {
+          console.log('Token expired or invalid, attempting to refresh...');
           return this.refreshToken().pipe(
             switchMap(() => {
               const newHeaders = this.getAuthHeaders();
@@ -228,8 +257,7 @@ export class AuthService {
     const formData = new FormData();
     formData.append('file', file);
     
-    const headers = this.getAuthHeaders();
-    headers.delete('Content-Type');
+    const headers = this.getAuthHeadersForFileUpload();
     
     return this.http.post<AuthResponse>(this.UPLOAD_AVATAR_ENDPOINT, formData, { headers }).pipe(
       map((response: AuthResponse) => {
@@ -246,8 +274,7 @@ export class AuthService {
           console.log('Token expired during avatar upload, attempting to refresh...');
           return this.refreshToken().pipe(
             switchMap(() => {
-              const newHeaders = this.getAuthHeaders();
-              newHeaders.delete('Content-Type');
+              const newHeaders = this.getAuthHeadersForFileUpload();
               return this.http.post<AuthResponse>(this.UPLOAD_AVATAR_ENDPOINT, formData, { headers: newHeaders });
             }),
             map((response: AuthResponse) => {
@@ -274,8 +301,7 @@ export class AuthService {
     const formData = new FormData();
     formData.append('file', file);
     
-    const headers = this.getAuthHeaders();
-    headers.delete('Content-Type');
+    const headers = this.getAuthHeadersForFileUpload();
     
     return this.http.post<AuthResponse>(this.UPLOAD_COVER_ENDPOINT, formData, { headers }).pipe(
       map((response: AuthResponse) => {
@@ -292,8 +318,7 @@ export class AuthService {
           console.log('Token expired during cover upload, attempting to refresh...');
           return this.refreshToken().pipe(
             switchMap(() => {
-              const newHeaders = this.getAuthHeaders();
-              newHeaders.delete('Content-Type');
+              const newHeaders = this.getAuthHeadersForFileUpload();
               return this.http.post<AuthResponse>(this.UPLOAD_COVER_ENDPOINT, formData, { headers: newHeaders });
             }),
             map((response: AuthResponse) => {

@@ -81,8 +81,7 @@ export class SettingsComponent implements OnInit {
         next: (response) => {
           if (response && response.success) {
             this.successMessage = 'Profile information updated successfully!';
-            
-            // 🔹 Обновляем пользователя в AuthService
+
             if (response.user) {
               this.authService.setCurrentUser(response.user);
               this.settingsForm.patchValue({
@@ -117,12 +116,10 @@ export class SettingsComponent implements OnInit {
     let completedUploads = 0;
     let hasErrors = false;
 
-    // Count how many uploads we need to do
     if (this.avatarFile) uploadCount++;
     if (this.coverFile) uploadCount++;
 
     if (uploadCount === 0) {
-      // No images to upload, we're done
       this.isLoading = false;
       this.settingsForm.enable();
       this.avatarFile = null;
@@ -152,17 +149,30 @@ export class SettingsComponent implements OnInit {
       }
     };
 
-    // Upload avatar if selected
     if (this.avatarFile) {
       this.authService.uploadAvatar(this.avatarFile).subscribe({
         next: (response) => {
           if (response && response.success) {
             console.log('Avatar uploaded successfully');
-            // Обновляем данные пользователя если они есть в ответе
-            if (response.user) {
+            if (response.avatarUrl) {
               this.settingsForm.patchValue({
-                avatar: response.user.avatar || ''
+                avatar: response.avatarUrl
               });
+              const currentUser = this.authService.getCurrentUser();
+              const formValues = this.settingsForm.value;
+              console.log('🔍 Settings: Current user before avatar update:', currentUser);
+              console.log('🔍 Settings: Form values:', formValues);
+              console.log('🔍 Settings: New avatar URL:', response.avatarUrl);
+              if (currentUser) {
+                const updatedUser = { 
+                  ...currentUser, 
+                  avatar: response.avatarUrl,
+                  ...(formValues.coverPhoto && formValues.coverPhoto !== 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo' && { coverPhoto: formValues.coverPhoto })
+                };
+                console.log('🔍 Settings: Updated user with new avatar:', updatedUser);
+                this.authService.setCurrentUser(updatedUser);
+                console.log('🔍 Settings: User data updated in AuthService');
+              }
             }
           } else {
             hasErrors = true;
@@ -178,17 +188,30 @@ export class SettingsComponent implements OnInit {
       });
     }
 
-    // Upload cover if selected
     if (this.coverFile) {
       this.authService.uploadCover(this.coverFile).subscribe({
         next: (response) => {
           if (response && response.success) {
             console.log('Cover uploaded successfully');
-            // Обновляем данные пользователя если они есть в ответе
-            if (response.user) {
+            if (response.coverUrl) {
               this.settingsForm.patchValue({
-                coverPhoto: response.user.coverPhoto || ''
+                coverPhoto: response.coverUrl
               });
+              const currentUser = this.authService.getCurrentUser();
+              const formValues = this.settingsForm.value;
+              console.log('🔍 Settings: Current user before cover update:', currentUser);
+              console.log('🔍 Settings: Form values:', formValues);
+              console.log('🔍 Settings: New cover URL:', response.coverUrl);
+              if (currentUser) {
+                const updatedUser = { 
+                  ...currentUser, 
+                  coverPhoto: response.coverUrl,
+                  ...(formValues.avatar && formValues.avatar !== 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD' && { avatar: formValues.avatar })
+                };
+                console.log('🔍 Settings: Updated user with new cover:', updatedUser);
+                this.authService.setCurrentUser(updatedUser);
+                console.log('🔍 Settings: Cover user data updated in AuthService');
+              }
             }
           } else {
             hasErrors = true;

@@ -24,7 +24,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Подписываемся на изменения пользователя в реальном времени
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       if (!this.currentUser) {
@@ -43,6 +42,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.currentUser) {
       this.userAvatar = this.currentUser.avatar || this.userAvatar;
       this.userCoverPhoto = this.currentUser.coverPhoto || this.userCoverPhoto;
+
+      console.log('Profile Display Debug:');
+      console.log('userAvatar variable:', this.userAvatar);
+      console.log('userCoverPhoto variable:', this.userCoverPhoto);
+      console.log('currentUser.avatar:', this.currentUser.avatar);
+      console.log('currentUser.coverPhoto:', this.currentUser.coverPhoto);
     }
   }
 
