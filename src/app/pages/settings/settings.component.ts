@@ -55,11 +55,19 @@ export class SettingsComponent implements OnInit {
         username: currentUser.username,
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
-        avatar: currentUser.avatar || '',
-        coverPhoto: currentUser.coverPhoto || '',
+        avatar: this.getProxyImageUrl(currentUser.avatar) || '',
+        coverPhoto: this.getProxyImageUrl(currentUser.coverPhoto) || '',
         bio: currentUser.bio || ''
       });
     }
+  }
+
+  private getProxyImageUrl(imageUrl: string | null | undefined): string | null {
+    if (!imageUrl || !imageUrl.startsWith('http://localhost:9000/user-images/')) {
+      return null;
+    }
+
+    return `http://localhost:8080/auth/public/api/images/proxy?url=${encodeURIComponent(imageUrl)}`;
   }
 
   onSubmit(): void {
@@ -292,11 +300,19 @@ export class SettingsComponent implements OnInit {
   }
 
   getCurrentAvatarUrl(): string {
-    return this.settingsForm.get('avatar')?.value || '';
+    const url = this.settingsForm.get('avatar')?.value || '';
+    if (url.startsWith('data:')) {
+      return url;
+    }
+    return this.getProxyImageUrl(url) || url;
   }
 
   getCurrentCoverUrl(): string {
-    return this.settingsForm.get('coverPhoto')?.value || '';
+    const url = this.settingsForm.get('coverPhoto')?.value || '';
+    if (url.startsWith('data:')) {
+      return url;
+    }
+    return this.getProxyImageUrl(url) || url;
   }
 
   onImageError(event: Event): void {

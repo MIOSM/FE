@@ -51,7 +51,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly API_BASE_URL = 'http://localhost:8080';
-  private readonly AUTH_SERVICE_URL = 'http://localhost:8081'; // Direct auth-service URL for file uploads
+  private readonly AUTH_SERVICE_URL = 'http://localhost:8081'; 
   private readonly LOGIN_ENDPOINT = `${this.API_BASE_URL}/auth/login`;
   private readonly REGISTER_ENDPOINT = `${this.API_BASE_URL}/auth/register`;
   private readonly REFRESH_TOKEN_ENDPOINT = `${this.API_BASE_URL}/auth/refresh`;
@@ -89,14 +89,22 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(this.LOGIN_ENDPOINT, credentials).pipe(
-      map((response: AuthResponse) => {
+      switchMap((response: AuthResponse) => {
         if (response.success && response.token && response.user) {
           localStorage.setItem('access_token', response.token);
           localStorage.setItem('refresh_token', response.refreshToken || '');
           localStorage.setItem('user_data', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
+
+          return this.getUserProfile().pipe(
+            map(() => response),
+            catchError(() => {
+              console.warn('Failed to fetch user profile after login, using login response data');
+              return [response];
+            })
+          );
         }
-        return response;
+        return [response];
       }),
       catchError(error => {
         return throwError(() => error.error || { success: false, message: 'Login failed.' });
