@@ -55,8 +55,8 @@ export class SettingsComponent implements OnInit {
         username: currentUser.username,
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
-        avatar: this.getProxyImageUrl(currentUser.avatar) || '',
-        coverPhoto: this.getProxyImageUrl(currentUser.coverPhoto) || '',
+        avatar: currentUser.avatar || '',
+        coverPhoto: currentUser.coverPhoto || '',
         bio: currentUser.bio || ''
       });
     }
@@ -167,19 +167,12 @@ export class SettingsComponent implements OnInit {
                 avatar: response.avatarUrl
               });
               const currentUser = this.authService.getCurrentUser();
-              const formValues = this.settingsForm.value;
-              console.log('🔍 Settings: Current user before avatar update:', currentUser);
-              console.log('🔍 Settings: Form values:', formValues);
-              console.log('🔍 Settings: New avatar URL:', response.avatarUrl);
               if (currentUser) {
                 const updatedUser = { 
                   ...currentUser, 
-                  avatar: response.avatarUrl,
-                  ...(formValues.coverPhoto && formValues.coverPhoto !== 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo' && { coverPhoto: formValues.coverPhoto })
+                  avatar: response.avatarUrl
                 };
-                console.log('🔍 Settings: Updated user with new avatar:', updatedUser);
                 this.authService.setCurrentUser(updatedUser);
-                console.log('🔍 Settings: User data updated in AuthService');
               }
             }
           } else {
@@ -206,19 +199,12 @@ export class SettingsComponent implements OnInit {
                 coverPhoto: response.coverUrl
               });
               const currentUser = this.authService.getCurrentUser();
-              const formValues = this.settingsForm.value;
-              console.log('🔍 Settings: Current user before cover update:', currentUser);
-              console.log('🔍 Settings: Form values:', formValues);
-              console.log('🔍 Settings: New cover URL:', response.coverUrl);
               if (currentUser) {
                 const updatedUser = { 
                   ...currentUser, 
-                  coverPhoto: response.coverUrl,
-                  ...(formValues.avatar && formValues.avatar !== 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD' && { avatar: formValues.avatar })
+                  coverPhoto: response.coverUrl
                 };
-                console.log('🔍 Settings: Updated user with new cover:', updatedUser);
                 this.authService.setCurrentUser(updatedUser);
-                console.log('🔍 Settings: Cover user data updated in AuthService');
               }
             }
           } else {
@@ -302,17 +288,23 @@ export class SettingsComponent implements OnInit {
   getCurrentAvatarUrl(): string {
     const url = this.settingsForm.get('avatar')?.value || '';
     if (url.startsWith('data:')) {
-      return url;
+      return url; 
     }
-    return this.getProxyImageUrl(url) || url;
+    if (url && url.startsWith('http://localhost:9000/user-images/')) {
+      return this.getProxyImageUrl(url) || url; 
+    }
+    return url; 
   }
 
   getCurrentCoverUrl(): string {
     const url = this.settingsForm.get('coverPhoto')?.value || '';
     if (url.startsWith('data:')) {
-      return url;
+      return url; 
     }
-    return this.getProxyImageUrl(url) || url;
+    if (url && url.startsWith('http://localhost:9000/user-images/')) {
+      return this.getProxyImageUrl(url) || url; 
+    }
+    return url; 
   }
 
   onImageError(event: Event): void {
