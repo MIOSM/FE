@@ -73,9 +73,33 @@ textarea.form-control {
     }
   }
 
-  .cover-preview {
+.cover-preview {
     width: 200px;
     height: 100px;
     border-radius: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    .settings-container {
+      padding-bottom: 120px; 
+    }
+    
+    .submit-btn {
+      margin-bottom: 20px; 
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  :host {
+    .settings-container {
+      padding-bottom: 110px; 
+    }
+    
+    .submit-btn {
+      margin-bottom: 15px;
+    }
   }
 }
