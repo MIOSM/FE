@@ -46,31 +46,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.userAvatar = proxyAvatarUrl || this.userAvatar;
       this.userCoverPhoto = proxyCoverUrl || this.userCoverPhoto;
 
-      console.log('Profile Display Debug:');
-      console.log('Original avatar URL:', this.currentUser.avatar);
-      console.log('Proxy avatar URL:', proxyAvatarUrl);
-      console.log('Final userAvatar variable:', this.userAvatar);
-      console.log('Original cover URL:', this.currentUser.coverPhoto);
-      console.log('Proxy cover URL:', proxyCoverUrl);
-      console.log('Final userCoverPhoto variable:', this.userCoverPhoto);
     }
   }
 
   private getProxyImageUrl(imageUrl: string | null | undefined): string | null {
-    console.log('getProxyImageUrl called with:', imageUrl);
-    
     if (!imageUrl) {
-      console.log('No imageUrl provided');
       return null;
     }
     
     if (!imageUrl.startsWith('http://localhost:9000/user-images/')) {
-      console.log('URL does not start with MinIO prefix:', imageUrl);
       return null;
     }
 
     const proxyUrl = `http://localhost:8080/auth/public/api/images/proxy?url=${encodeURIComponent(imageUrl)}`;
-    console.log('Generated auth-service public proxy URL:', proxyUrl);
     return proxyUrl;
   }
 

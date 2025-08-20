@@ -29,7 +29,6 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
-      console.log('User not authenticated, redirecting to login...');
       return;
     }
     
@@ -161,7 +160,6 @@ export class SettingsComponent implements OnInit {
       this.authService.uploadAvatar(this.avatarFile).subscribe({
         next: (response) => {
           if (response && response.success) {
-            console.log('Avatar uploaded successfully');
             if (response.avatarUrl) {
               this.settingsForm.patchValue({
                 avatar: response.avatarUrl
@@ -193,7 +191,6 @@ export class SettingsComponent implements OnInit {
       this.authService.uploadCover(this.coverFile).subscribe({
         next: (response) => {
           if (response && response.success) {
-            console.log('Cover uploaded successfully');
             if (response.coverUrl) {
               this.settingsForm.patchValue({
                 coverPhoto: response.coverUrl
