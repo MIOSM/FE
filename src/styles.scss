@@ -147,24 +147,24 @@ body {
 
 .auth-card {
   background: var(--bg-primary);
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: var(--shadow-md);
-  padding: 32px 32px 24px 32px;
+  padding: 24px 28px 20px 28px;
   width: 100%;
-  max-width: 400px;
+  max-width: 520px;
   z-index: 1;
   border: 1px solid var(--border-primary);
 }
 
 .auth-header {
   text-align: left;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 
   h1 {
     color: var(--text-primary);
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     background: none;
     -webkit-background-clip: unset;
     -webkit-text-fill-color: unset;
@@ -173,30 +173,30 @@ body {
 
   p {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin: 0;
   }
 }
 
 .auth-form {
   .form-group {
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
 
   .form-label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     color: var(--text-primary);
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .form-input {
     width: 100%;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border: 1.5px solid var(--border-primary);
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     background: var(--bg-secondary);
     color: var(--text-primary);
     transition: border 0.2s, background 0.2s;
@@ -224,26 +224,26 @@ body {
 
   .error-message {
     color: var(--error-600);
-    font-size: 0.85rem;
-    margin-top: 4px;
+    font-size: 0.8rem;
+    margin-top: 3px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     &::before {
       content: "⚠";
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
   }
 }
 
 .btn {
   width: 100%;
-  padding: 12px;
+  padding: 11px;
   background: var(--primary-500);
   color: var(--text-inverse);
   border: none;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
@@ -313,13 +313,13 @@ body {
 }
 
 .message {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 6px;
-  margin: 18px 0;
+  margin: 12px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  font-size: 0.85rem;
 
   &.success {
     background: var(--success-100);
@@ -341,49 +341,49 @@ body {
 }
 
 .message-container {
-  margin-top: 16px;
+  margin-top: 12px;
 
   .success-message {
     background: var(--success-100);
     color: var(--success-800);
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: 6px;
     border-left: 4px solid var(--success-500);
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
   }
 
   .error-message {
     background: var(--error-100);
     color: var(--error-800);
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: 6px;
     border-left: 4px solid var(--error-500);
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
   }
 
   .warning-message {
     background: var(--warning-100);
     color: var(--warning-800);
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: 6px;
     border-left: 4px solid var(--warning-500);
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
   }
 }
 
 .auth-footer {
   text-align: center;
-  margin-top: 24px;
-  padding-top: 16px;
+  margin-top: 18px;
+  padding-top: 14px;
   border-top: 1px solid var(--border-primary);
 
   p {
     color: var(--text-secondary);
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .link {
@@ -404,27 +404,29 @@ body {
     padding: 16px;
   }
   .auth-card {
-    padding: 24px 20px;
-    border-radius: 8px;
-    max-width: 100%;
-    margin: 0 8px;
+    max-width: 480px;
+    padding: 20px 24px 18px 24px;
   }
   .auth-header {
+    margin-bottom: 18px;
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
     }
     p {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
     }
   }
   .auth-form {
+    .form-group {
+      margin-bottom: 12px;
+    }
     .form-input {
-      padding: 12px 12px;
+      padding: 10px 12px;
       font-size: 16px; 
     }
   }
   .btn {
-    padding: 12px;
+    padding: 11px;
     font-size: 16px;
   }
 }
@@ -434,20 +436,22 @@ body {
     padding: 12px;
   }
   .auth-card {
-    padding: 20px 16px;
+    padding: 18px 16px 16px 16px;
     margin: 0 4px;
+    max-width: 100%;
   }
   .auth-header {
+    margin-bottom: 16px;
     h1 {
-      font-size: 1.3rem;
+      font-size: 1.5rem;
     }
     p {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
     }
   }
   .auth-form {
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .form-input {
       padding: 10px 12px;
@@ -455,8 +459,12 @@ body {
     }
   }
   .btn {
-    padding: 12px;
+    padding: 11px;
     font-size: 16px;
+  }
+  .auth-footer {
+    margin-top: 16px;
+    padding-top: 12px;
   }
 }
 
@@ -466,17 +474,17 @@ body {
   align-items: flex-start;
   min-height: 100vh;
   padding: 2rem;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 .settings-card {
   background: var(--bg-primary);
   border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
   width: 100%;
-  max-width: 500px;
-  margin-top: 2rem;
+  max-width: 650px;
+  margin-top: 1.5rem;
   border: 1px solid var(--border-primary);
 }
 

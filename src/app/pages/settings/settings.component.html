@@ -49,17 +49,17 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Avatar</label>
-        <div class="image-upload-container">
-          <div class="image-preview" (click)="openAvatarModal()">
+      <div class="form-group avatar-section">
+        <label class="form-label">Profile Avatar</label>
+        <div class="avatar-upload-container">
+          <div class="avatar-preview" (click)="openAvatarModal()">
             <img 
               [src]="getCurrentAvatarUrl() || 'assets/default-avatar.png'" 
               alt="Avatar" 
-              class="preview-image"
+              class="avatar-image"
               (error)="onImageError($event)"
             />
-            <div class="image-overlay">
+            <div class="avatar-overlay">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7,10 12,15 17,10"></polyline>
@@ -68,21 +68,24 @@
               <span>Change Avatar</span>
             </div>
           </div>
-          <div class="help-text">Click to upload a new avatar image</div>
+          <div class="avatar-info">
+            <div class="help-text">Click to upload a new profile picture</div>
+            <div class="image-specs">Recommended: 400x400px, max 5MB</div>
+          </div>
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group cover-section">
         <label class="form-label">Cover Photo</label>
-        <div class="image-upload-container">
-          <div class="image-preview cover-preview" (click)="openCoverModal()">
+        <div class="cover-upload-container">
+          <div class="cover-preview" (click)="openCoverModal()">
             <img 
               [src]="getCurrentCoverUrl() || 'assets/default-cover.png'" 
               alt="Cover Photo" 
-              class="preview-image"
+              class="cover-image"
               (error)="onImageError($event)"
             />
-            <div class="image-overlay">
+            <div class="cover-overlay">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7,10 12,15 17,10"></polyline>
@@ -91,7 +94,10 @@
               <span>Change Cover</span>
             </div>
           </div>
-          <div class="help-text">Click to upload a new cover photo</div>
+          <div class="cover-info">
+            <div class="help-text">Click to upload a new cover photo</div>
+            <div class="image-specs">Recommended: 1200x400px, max 10MB</div>
+          </div>
         </div>
       </div>
 

@@ -1,8 +1,7 @@
 .help-text {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 0.25rem;
-  font-style: italic;
 }
 
 textarea.form-control {
@@ -14,69 +13,191 @@ textarea.form-control {
 .settings-card {
   background: white;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
+  max-width: 650px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
-.image-upload-container {
-  .image-preview {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid #e5e7eb;
+.avatar-section {
+  .avatar-upload-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 1px solid var(--border-primary);
 
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    .avatar-preview {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 3px solid var(--border-primary);
+      background: var(--bg-primary);
+      flex-shrink: 0;
 
-      .image-overlay {
-        opacity: 1;
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-400);
+
+        .avatar-overlay {
+          opacity: 1;
+        }
+      }
+
+      .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+      }
+
+      .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+        color: white;
+
+        svg {
+          width: 24px;
+          height: 24px;
+          margin-bottom: 6px;
+        }
+
+        span {
+          font-size: 0.8rem;
+          font-weight: 500;
+          text-align: center;
+        }
       }
     }
 
-    .preview-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: all 0.3s ease;
-    }
+    .avatar-info {
+      flex: 1;
+      padding-top: 0.5rem;
 
-    .image-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: all 0.3s ease;
-      color: white;
-
-      svg {
-        width: 24px;
-        height: 24px;
-        margin-bottom: 8px;
-      }
-
-      span {
-        font-size: 0.8rem;
+      .help-text {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
         font-weight: 500;
-        text-align: center;
+      }
+
+      .image-specs {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-style: italic;
       }
     }
   }
+}
 
-.cover-preview {
-    width: 200px;
-    height: 100px;
-    border-radius: 8px;
+.cover-section {
+  .cover-upload-container {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 1px solid var(--border-primary);
+
+    .cover-preview {
+      position: relative;
+      width: 100%;
+      height: 140px;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid var(--border-primary);
+      background: var(--bg-primary);
+      margin-bottom: 0.75rem;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-400);
+
+        .cover-overlay {
+          opacity: 1;
+        }
+      }
+
+      .cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+      }
+
+      .cover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+        color: white;
+
+        svg {
+          width: 24px;
+          height: 24px;
+          margin-bottom: 6px;
+        }
+
+        span {
+          font-size: 0.8rem;
+          font-weight: 500;
+          text-align: center;
+        }
+      }
+    }
+
+    .cover-info {
+      text-align: center;
+
+      .help-text {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+      }
+
+      .image-specs {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-style: italic;
+      }
+    }
   }
 }
 
@@ -90,6 +211,32 @@ textarea.form-control {
       margin-bottom: 20px; 
     }
   }
+
+  .avatar-section {
+    .avatar-upload-container {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+
+      .avatar-preview {
+        width: 100px;
+        height: 100px;
+      }
+
+      .avatar-info {
+        padding-top: 0;
+      }
+    }
+  }
+
+  .cover-section {
+    .cover-upload-container {
+      .cover-preview {
+        height: 120px;
+      }
+    }
+  }
 }
 
 @media (max-width: 480px) {
@@ -100,6 +247,48 @@ textarea.form-control {
     
     .submit-btn {
       margin-bottom: 15px;
+    }
+  }
+
+  .avatar-section {
+    .avatar-upload-container {
+      padding: 0.75rem;
+
+      .avatar-preview {
+        width: 90px;
+        height: 90px;
+        border-width: 2px;
+      }
+
+      .avatar-info {
+        .help-text {
+          font-size: 0.85rem;
+        }
+
+        .image-specs {
+          font-size: 0.7rem;
+        }
+      }
+    }
+  }
+
+  .cover-section {
+    .cover-upload-container {
+      padding: 0.75rem;
+
+      .cover-preview {
+        height: 100px;
+      }
+
+      .cover-info {
+        .help-text {
+          font-size: 0.85rem;
+        }
+
+        .image-specs {
+          font-size: 0.7rem;
+        }
+      }
     }
   }
 }
