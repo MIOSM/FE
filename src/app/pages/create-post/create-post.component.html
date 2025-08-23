@@ -1,0 +1,112 @@
+<div class="create-post-page" *ngIf="currentUser">
+  <!-- Header -->
+  <div class="create-post-header">
+    <button class="back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h1 class="page-title">Create Post</h1>
+    <button 
+      class="post-btn" 
+      [disabled]="!isPostValid || isSubmitting"
+      (click)="createPost()">
+      <span *ngIf="!isSubmitting">Post</span>
+      <span *ngIf="isSubmitting">
+        <i class="fas fa-spinner fa-spin"></i>
+        Posting...
+      </span>
+    </button>
+  </div>
+
+  <div class="post-form">
+    <div class="user-info">
+      <div class="user-avatar">
+        <img [src]="userAvatar" alt="Your avatar" />
+      </div>
+      <div class="user-details">
+        <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+        <span class="user-username">&#64;{{ currentUser.username }}</span>
+      </div>
+    </div>
+
+    <div class="text-input-section">
+      <textarea
+        [(ngModel)]="postText"
+        (input)="onTextareaInput($event)"
+        placeholder="What's happening?"
+        class="post-textarea"
+        [class.over-limit]="remainingCharacters < 0"
+        maxlength="300">
+      </textarea>
+
+      <div class="character-counter" [class.over-limit]="remainingCharacters < 0">
+        {{ remainingCharacters }}
+      </div>
+    </div>
+
+    <div class="media-preview" *ngIf="mediaFiles.length > 0">
+      <div class="media-grid" [class]="'media-count-' + mediaFiles.length">
+        <div 
+          class="media-item" 
+          *ngFor="let media of mediaFiles; let i = index"
+          [class.video-item]="media.type === 'video'">
+
+          <img 
+            *ngIf="media.type === 'image'" 
+            [src]="media.url" 
+            [alt]="media.file.name"
+            class="media-preview-img" />
+
+          <video 
+            *ngIf="media.type === 'video'" 
+            [src]="media.url" 
+            class="media-preview-video"
+            controls
+            muted>
+          </video>
+
+          <button class="remove-media-btn" (click)="removeMediaFile(i)">
+            <i class="fas fa-times"></i>
+          </button>
+
+          <div class="video-indicator" *ngIf="media.type === 'video'">
+            <i class="fas fa-play"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="media-actions">
+      <input 
+        type="file" 
+        #fileInput 
+        (change)="onFileSelect($event)"
+        accept="image/*,video/*"
+        multiple
+        style="display: none;" />
+      
+      <button class="media-btn" (click)="fileInput.click()" [disabled]="mediaFiles.length >= 4">
+        <i class="fas fa-image"></i>
+        <span>Photo/Video</span>
+      </button>
+
+      <div class="media-info">
+        <span class="media-count" *ngIf="mediaFiles.length > 0">
+          {{ mediaFiles.length }}/4 files
+        </span>
+        <span class="media-limit">Max 10MB per file</span>
+      </div>
+    </div>
+
+    <div class="post-options">
+      <div class="visibility-option">
+        <i class="fas fa-globe"></i>
+        <span>Everyone can reply</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="!currentUser">
+  <div class="spinner"></div>
+  <p>Loading...</p>
+</div>

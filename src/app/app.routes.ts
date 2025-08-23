@@ -4,6 +4,7 @@ import { RegistrationComponent } from './pages/registration/registration.compone
 import { LayoutComponent } from './layout/layout/layout.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { CreatePostComponent } from './pages/create-post/create-post.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -17,6 +18,7 @@ export const routes: Routes = [
     children: [
       { path: 'profile', component: ProfileComponent },
       { path: 'settings', component: SettingsComponent },
+      { path: 'create-post', component: CreatePostComponent },
       { path: '', redirectTo: 'profile', pathMatch: 'full' }
     ]
   },

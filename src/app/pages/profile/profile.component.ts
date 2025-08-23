@@ -66,6 +66,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.router.navigate(['/settings']);
   }
 
+  createPost(): void {
+    this.router.navigate(['/create-post']);
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
