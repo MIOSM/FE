@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
+import { PostService, PostResponse } from '../../core/services/post.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,13 +14,16 @@ import { Subscription } from 'rxjs';
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
+  userPosts: PostResponse[] = [];
   private userSubscription: Subscription = new Subscription();
+  isLoadingPosts: boolean = false;
 
   userAvatar: string = 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD';
   userCoverPhoto: string = 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo';
 
   constructor(
     private authService: AuthService,
+    private postService: PostService,
     private router: Router
   ) {}
 
@@ -30,6 +34,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.router.navigate(['/login']);
       } else {
         this.loadUserProfileData();
+        this.loadUserPosts();
       }
     });
   }
@@ -40,13 +45,46 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   private loadUserProfileData(): void {
     if (this.currentUser) {
-      const proxyAvatarUrl = this.getProxyImageUrl(this.currentUser.avatar);
-      const proxyCoverUrl = this.getProxyImageUrl(this.currentUser.coverPhoto);
-      
-      this.userAvatar = proxyAvatarUrl || this.userAvatar;
-      this.userCoverPhoto = proxyCoverUrl || this.userCoverPhoto;
-
+      if (this.currentUser.avatar) {
+        this.userAvatar = this.getProxyImageUrl(this.currentUser.avatar) || this.userAvatar;
+      }
+      if (this.currentUser.coverPhoto) {
+        this.userCoverPhoto = this.getProxyImageUrl(this.currentUser.coverPhoto) || this.userCoverPhoto;
+      }
     }
+  }
+
+  private loadUserPosts(): void {
+    if (this.currentUser) {
+      console.log('Loading posts for user:', this.currentUser.username);
+      this.isLoadingPosts = true;
+      this.postService.getPostsByUser(this.currentUser.username).subscribe({
+        next: (posts) => {
+          console.log('Received posts:', posts);
+          this.userPosts = posts;
+          this.isLoadingPosts = false;
+        },
+        error: (error) => {
+          console.error('Error loading posts:', error);
+          this.isLoadingPosts = false;
+        },
+        complete: () => {
+          console.log('Post loading completed');
+        }
+      });
+    }
+  }
+
+  getPostImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    
+    // If it's already a full URL, return it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // For post media, use the post service URL directly
+    return `http://localhost:8080/post-service${imageUrl}`;
   }
 
   private getProxyImageUrl(imageUrl: string | null | undefined): string | null {
@@ -54,16 +92,33 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return null;
     }
     
-    if (!imageUrl.startsWith('http://localhost:9000/user-images/')) {
-      return null;
+    // If it's already a full URL, return it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
     }
-
-    const proxyUrl = `http://localhost:8080/auth/public/api/images/proxy?url=${encodeURIComponent(imageUrl)}`;
-    return proxyUrl;
+    
+    // For user images (avatars, covers)
+    if (imageUrl.startsWith('/user-images/')) {
+      return `http://localhost:8080/user-service${imageUrl}`;
+    }
+    
+    // For post images
+    if (imageUrl.startsWith('/post-media/')) {
+      return `http://localhost:8080/post-service${imageUrl}`;
+    }
+    
+    return null;
   }
 
   editProfile(): void {
     this.router.navigate(['/settings']);
+  }
+
+  openImagePreview(imageUrl: string): void {
+    // In a real app, you might want to open a modal or lightbox here
+    console.log('Opening image preview:', imageUrl);
+    // For now, we'll just open the image in a new tab
+    window.open(imageUrl, '_blank');
   }
 
   createPost(): void {

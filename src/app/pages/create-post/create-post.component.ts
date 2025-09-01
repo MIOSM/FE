@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
+import { PostService } from '../../core/services/post.service';
 import { Subscription } from 'rxjs';
 
 interface MediaFile {
@@ -30,6 +31,7 @@ export class CreatePostComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private postService: PostService,
     private router: Router
   ) {}
 
@@ -134,27 +136,28 @@ export class CreatePostComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
 
     try {
-      console.log('Creating post with:', {
-        text: this.postText,
-        mediaFiles: this.mediaFiles.map(m => ({
-          name: m.file.name,
-          type: m.type,
-          size: m.file.size
-        }))
+      const mediaFiles = this.mediaFiles.map(m => m.file);
+      
+      this.postService.createPost(this.postText, mediaFiles).subscribe({
+        next: (response) => {
+          console.log('Post created successfully:', response);
+          alert('Post created successfully!');
+          this.resetForm();
+          this.router.navigate(['/profile']);
+        },
+        error: (error) => {
+          console.error('Error creating post:', error);
+          alert('Failed to create post. Please try again.');
+          this.isSubmitting = false;
+        },
+        complete: () => {
+          this.isSubmitting = false;
+        }
       });
-
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      alert('Post created successfully! (This is a placeholder - actual posting will be implemented when the post service is ready)');
-
-      this.resetForm();
-
-      this.router.navigate(['/profile']);
 
     } catch (error) {
       console.error('Error creating post:', error);
       alert('Failed to create post. Please try again.');
-    } finally {
       this.isSubmitting = false;
     }
   }

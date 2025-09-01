@@ -67,7 +67,66 @@
 
   <div class="profile-content">
     <div class="posts-section">
-      <div class="empty-state">
+      <div class="loading-posts" *ngIf="isLoadingPosts">
+        <div class="spinner"></div>
+        <p>Loading posts...</p>
+      </div>
+
+      <div class="posts-list" *ngIf="!isLoadingPosts && userPosts.length > 0">
+        <div class="post-card" *ngFor="let post of userPosts">
+          <div class="post-header">
+            <div class="post-avatar" [style.background]="'var(--primary-100)'">
+              <span class="avatar-text" *ngIf="!currentUser.avatar">
+                {{ currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U' }}
+              </span>
+              <img [src]="currentUser.avatar" *ngIf="currentUser.avatar" alt="User Avatar" />
+            </div>
+            <div class="post-user-info">
+              <h4 class="post-username">{{ post.username || 'User' }}</h4>
+              <p class="post-time">{{ post.createdAt | date:'medium' }}</p>
+            </div>
+          </div>
+
+          <div class="post-content">
+            <p class="post-text">{{ post.content }}</p>
+
+            <div class="post-images" *ngIf="post.imageUrls && post.imageUrls.length > 0">
+              <img 
+                *ngFor="let imageUrl of post.imageUrls"
+                [src]="getPostImageUrl(imageUrl)" 
+                alt="Post image" 
+                class="post-image"
+                (click)="openImagePreview(getPostImageUrl(imageUrl))"
+              >
+            </div>
+
+            <div class="post-videos" *ngIf="post.videoUrls && post.videoUrls.length > 0">
+              <video 
+                *ngFor="let videoUrl of post.videoUrls"
+                [src]="getPostImageUrl(videoUrl)"
+                controls
+                class="post-video">
+              </video>
+            </div>
+          </div>
+
+          <div class="post-actions">
+            <button class="action-btn">
+              <i class="fas fa-heart"></i>
+              <span>0</span>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-comment"></i>
+              <span>0</span>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-share"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoadingPosts && userPosts.length === 0">
         <div class="empty-icon">
           <i class="fas fa-feather-alt"></i>
         </div>
