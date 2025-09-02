@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
 import { PostService, PostResponse } from '../../core/services/post.service';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-profile',
@@ -18,13 +19,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private userSubscription: Subscription = new Subscription();
   isLoadingPosts: boolean = false;
 
+  showMediaViewer: boolean = false;
+  currentMediaIndex: number = 0;
+  currentMediaUrls: string[] = [];
+  currentMediaType: 'image' | 'video' = 'image';
+
   userAvatar: string = 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD';
   userCoverPhoto: string = 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo';
 
   constructor(
     private authService: AuthService,
     private postService: PostService,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -77,32 +84,55 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   getPostImageUrl(imageUrl: string): string {
     if (!imageUrl) return '';
-    
-    // If it's already a full URL, return it as is
+
     if (imageUrl.startsWith('http')) {
       return imageUrl;
     }
-    
-    // For post media, use the post service URL directly
+
     return `http://localhost:8080/post-service${imageUrl}`;
+  }
+  
+  openMediaViewer(mediaUrls: string[], initialIndex: number = 0, type: 'image' | 'video' = 'image'): void {
+    this.currentMediaUrls = mediaUrls.map(url => this.getPostImageUrl(url));
+    this.currentMediaIndex = initialIndex;
+    this.currentMediaType = type;
+    this.showMediaViewer = true;
+
+    document.body.style.overflow = 'hidden';
+  }
+  
+  closeMediaViewer(): void {
+    this.showMediaViewer = false;
+    document.body.style.overflow = '';
+  }
+  
+  navigateMedia(direction: 'prev' | 'next'): void {
+    if (direction === 'prev') {
+      this.currentMediaIndex = (this.currentMediaIndex - 1 + this.currentMediaUrls.length) % this.currentMediaUrls.length;
+    } else {
+      this.currentMediaIndex = (this.currentMediaIndex + 1) % this.currentMediaUrls.length;
+    }
+  }
+  
+  getCurrentMediaUrl(): SafeUrl {
+    if (!this.currentMediaUrls.length) return '';
+    const url = this.currentMediaUrls[this.currentMediaIndex];
+    return this.sanitizer.bypassSecurityTrustUrl(url);
   }
 
   private getProxyImageUrl(imageUrl: string | null | undefined): string | null {
     if (!imageUrl) {
       return null;
     }
-    
-    // If it's already a full URL, return it as is
+
     if (imageUrl.startsWith('http')) {
       return imageUrl;
     }
-    
-    // For user images (avatars, covers)
+
     if (imageUrl.startsWith('/user-images/')) {
       return `http://localhost:8080/user-service${imageUrl}`;
     }
-    
-    // For post images
+
     if (imageUrl.startsWith('/post-media/')) {
       return `http://localhost:8080/post-service${imageUrl}`;
     }
@@ -115,9 +145,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   openImagePreview(imageUrl: string): void {
-    // In a real app, you might want to open a modal or lightbox here
     console.log('Opening image preview:', imageUrl);
-    // For now, we'll just open the image in a new tab
     window.open(imageUrl, '_blank');
   }
 

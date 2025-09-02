@@ -67,6 +67,18 @@
 
   <div class="profile-content">
     <div class="posts-section">
+      <div class="create-post-container" *ngIf="userPosts.length > 0">
+        <button class="create-post-btn" (click)="createPost()">
+          <div class="post-avatar" [style.background]="'var(--primary-100)'">
+            <span class="avatar-text" *ngIf="!currentUser.avatar">
+              {{ currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U' }}
+            </span>
+            <img [src]="currentUser.avatar" *ngIf="currentUser.avatar" alt="User Avatar" />
+          </div>
+          <span class="create-post-text">What's on your mind?</span>
+        </button>
+      </div>
+
       <div class="loading-posts" *ngIf="isLoadingPosts">
         <div class="spinner"></div>
         <p>Loading posts...</p>
@@ -90,20 +102,25 @@
           <div class="post-content">
             <p class="post-text">{{ post.content }}</p>
 
-            <div class="post-images" *ngIf="post.imageUrls && post.imageUrls.length > 0">
+            <div 
+              class="post-images {{ 'image-count-' + (post.imageUrls?.length || 0) }} {{ 'image-count-' + (post.imageUrls?.length || 0) }}-images" 
+              *ngIf="post.imageUrls && post.imageUrls.length > 0"
+            >
               <img 
-                *ngFor="let imageUrl of post.imageUrls"
+                *ngFor="let imageUrl of post.imageUrls; let i = index"
                 [src]="getPostImageUrl(imageUrl)" 
                 alt="Post image" 
                 class="post-image"
-                (click)="openImagePreview(getPostImageUrl(imageUrl))"
+                (click)="openMediaViewer(post.imageUrls, i, 'image')"
+                loading="lazy"
               >
             </div>
 
             <div class="post-videos" *ngIf="post.videoUrls && post.videoUrls.length > 0">
               <video 
-                *ngFor="let videoUrl of post.videoUrls"
+                *ngFor="let videoUrl of post.videoUrls; let i = index"
                 [src]="getPostImageUrl(videoUrl)"
+                (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
                 controls
                 class="post-video">
               </video>
@@ -136,6 +153,42 @@
           <i class="fas fa-plus"></i>
           Create your first post
         </button>
+      </div>
+    </div>
+  </div>
+  <div class="media-viewer-overlay" *ngIf="showMediaViewer" (click)="closeMediaViewer()">
+    <div class="media-viewer-container" (click)="$event.stopPropagation()">
+      <button class="close-button" (click)="closeMediaViewer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <ng-container *ngIf="currentMediaType === 'image'">
+        <img [src]="currentMediaUrls[currentMediaIndex]" class="media-content" alt="Media content" />
+      </ng-container>
+      
+      <ng-container *ngIf="currentMediaType === 'video'">
+        <video [src]="currentMediaUrls[currentMediaIndex]" class="media-content" controls autoplay></video>
+      </ng-container>
+      
+      <div class="media-navigation">
+        <button (click)="$event.stopPropagation(); navigateMedia('prev')" *ngIf="currentMediaUrls.length > 1">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div></div> 
+        <button (click)="$event.stopPropagation(); navigateMedia('next')" *ngIf="currentMediaUrls.length > 1">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="media-counter" *ngIf="currentMediaUrls.length > 1">
+        {{ currentMediaIndex + 1 }} / {{ currentMediaUrls.length }}
       </div>
     </div>
   </div>
