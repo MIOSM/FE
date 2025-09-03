@@ -95,8 +95,13 @@ export class PostService {
     return `${md5.substring(0,8)}-${md5.substring(8,12)}-4${md5.substring(13,16)}-a${md5.substring(17,20)}-${md5.substring(20)}`;
   }
 
-  private hashString(algorithm: string, str: string): string {
+  deletePost(postId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/posts/${postId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
 
+  private hashString(algorithm: string, str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
@@ -113,12 +118,6 @@ export class PostService {
 
   getPostById(postId: string): Observable<PostResponse> {
     return this.http.get<PostResponse>(`${this.apiUrl}/api/posts/${postId}`, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  deletePost(postId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/posts/${postId}`, {
       headers: this.getAuthHeaders()
     });
   }

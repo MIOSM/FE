@@ -97,6 +97,16 @@
               <h4 class="post-username">{{ post.username || 'User' }}</h4>
               <p class="post-time">{{ post.createdAt | date:'medium' }}</p>
             </div>
+            <div class="post-actions-right" *ngIf="isCurrentUserPost(post)">
+              <button class="action-btn more-options" (click)="togglePostMenu(post.postId, $event)">
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+              <div class="post-dropdown-menu" [class.show]="isMenuOpen(post.postId)">
+                <button class="dropdown-item delete-btn" (click)="onDeletePost(post.postId, $event)">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="post-content">

@@ -23,6 +23,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentMediaIndex: number = 0;
   currentMediaUrls: string[] = [];
   currentMediaType: 'image' | 'video' = 'image';
+  openMenuPostId: string | null = null;
 
   userAvatar: string = 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD';
   userCoverPhoto: string = 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo';
@@ -32,7 +33,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private postService: PostService,
     private router: Router,
     private sanitizer: DomSanitizer
-  ) {}
+  ) {
+    // Close menu when clicking outside
+    document.addEventListener('click', this.handleClickOutside.bind(this));
+  }
 
   ngOnInit(): void {
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
@@ -48,6 +52,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.userSubscription.unsubscribe();
+    document.removeEventListener('click', this.handleClickOutside.bind(this));
   }
 
   private loadUserProfileData(): void {
@@ -147,6 +152,48 @@ export class ProfileComponent implements OnInit, OnDestroy {
   openImagePreview(imageUrl: string): void {
     console.log('Opening image preview:', imageUrl);
     window.open(imageUrl, '_blank');
+  }
+
+  onDeletePost(postId: string, event: Event): void {
+    event.stopPropagation();
+    this.closeAllMenus();
+    
+    if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      this.postService.deletePost(postId).subscribe({
+        next: () => {
+          this.userPosts = this.userPosts.filter(post => post.postId !== postId);
+          console.log('Post deleted successfully');
+        },
+        error: (error) => {
+          console.error('Error deleting post:', error);
+          alert('Failed to delete post. Please try again.');
+        }
+      });
+    }
+  }
+
+  isCurrentUserPost(post: PostResponse): boolean {
+    return this.currentUser?.username === post.username;
+  }
+
+  togglePostMenu(postId: string, event: Event): void {
+    event.stopPropagation();
+    this.openMenuPostId = this.openMenuPostId === postId ? null : postId;
+  }
+
+  isMenuOpen(postId: string): boolean {
+    return this.openMenuPostId === postId;
+  }
+
+  closeAllMenus(): void {
+    this.openMenuPostId = null;
+  }
+
+  private handleClickOutside(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.post-actions-right') && this.openMenuPostId) {
+      this.closeAllMenus();
+    }
   }
 
   createPost(): void {
