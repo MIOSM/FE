@@ -113,7 +113,7 @@
             <p class="post-text">{{ post.content }}</p>
 
             <div 
-              class="post-images {{ 'image-count-' + (post.imageUrls?.length || 0) }} {{ 'image-count-' + (post.imageUrls?.length || 0) }}-images" 
+              class="post-images {{ 'image-count-' + post.imageUrls.length }} {{ 'image-count-' + post.imageUrls.length }}-images" 
               *ngIf="post.imageUrls && post.imageUrls.length > 0"
             >
               <img 
