@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
 export interface PostResponse {
@@ -12,8 +12,8 @@ export interface PostResponse {
   content: string;
   imageUrls: string[];
   videoUrls: string[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 @Injectable({
@@ -82,8 +82,21 @@ export class PostService {
     return this.http.get<PostResponse[]>(url, {
       headers: this.getAuthHeaders()
     }).pipe(
+      tap((rawPosts: any) => console.log('Raw posts from API:', JSON.stringify(rawPosts, null, 2))),
+      map((posts: any[]) => 
+        posts.map(post => {
+          console.log('Original createdAt:', post.createdAt, 'type:', typeof post.createdAt);
+          const parsedPost = {
+            ...post,
+            createdAt: new Date(post.createdAt),
+            updatedAt: new Date(post.updatedAt)
+          };
+          console.log('Parsed post:', parsedPost);
+          return parsedPost;
+        })
+      ),
       tap({
-        next: (response: PostResponse[]) => console.log('Posts API response:', response),
+        next: (response: PostResponse[]) => console.log('Processed posts:', response),
         error: (error: any) => console.error('Posts API error:', error)
       })
     );

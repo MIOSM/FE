@@ -317,6 +317,17 @@
   border-radius: 12px;
   
   .create-post-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-align: left;
+    
     @media (max-width: 480px) {
       padding: 12px 15px;
       
@@ -324,20 +335,6 @@
         font-size: 0.9em;
       }
     }
-  }
-  padding: 12px 16px;
-  
-  .create-post-btn {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    background: none;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    text-align: left;
     
     &:hover {
       background-color: var(--bg-secondary);
@@ -486,6 +483,11 @@
           color: var(--text-secondary);
           font-size: 0.9rem;
           margin: 0;
+          text-transform: none;
+          letter-spacing: normal;
+          &::before {
+            content: none !important;
+          }
           display: inline-block;
 
           &::before {
