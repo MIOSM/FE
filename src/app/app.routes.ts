@@ -5,6 +5,7 @@ import { LayoutComponent } from './layout/layout/layout.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { CreatePostComponent } from './pages/create-post/create-post.component';
+import { SearchComponent } from './pages/search/search.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -17,6 +18,8 @@ export const routes: Routes = [
     canActivateChild: [authGuard],
     children: [
       { path: 'profile', component: ProfileComponent },
+      { path: 'profile/:username', component: ProfileComponent },
+      { path: 'search', component: SearchComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'create-post', component: CreatePostComponent },
       { path: '', redirectTo: 'profile', pathMatch: 'full' }

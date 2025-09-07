@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
 import { PostService, PostResponse } from '../../core/services/post.service';
 import { Subscription } from 'rxjs';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -15,9 +16,13 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
+  profileUser: User | any = null; 
   userPosts: PostResponse[] = [];
   private userSubscription: Subscription = new Subscription();
+  private routeSubscription: Subscription = new Subscription();
   isLoadingPosts: boolean = false;
+  isLoadingProfile: boolean = false;
+  isOwnProfile: boolean = true;
 
   showMediaViewer: boolean = false;
   currentMediaIndex: number = 0;
@@ -30,11 +35,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private userService: UserService,
     private postService: PostService,
     private router: Router,
+    private route: ActivatedRoute,
     private sanitizer: DomSanitizer
   ) {
-    // Close menu when clicking outside
     document.addEventListener('click', this.handleClickOutside.bind(this));
   }
 
@@ -43,34 +49,67 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.currentUser = user;
       if (!this.currentUser) {
         this.router.navigate(['/login']);
+      }
+    });
+
+    this.routeSubscription = this.route.params.subscribe(params => {
+      const username = params['username'];
+      if (username) {
+        this.isOwnProfile = false;
+        this.loadOtherUserProfile(username);
       } else {
-        this.loadUserProfileData();
-        this.loadUserPosts();
+        this.isOwnProfile = true;
+        if (this.currentUser) {
+          this.profileUser = this.currentUser;
+          this.loadUserProfileData();
+          this.loadUserPosts();
+        }
       }
     });
   }
 
   ngOnDestroy(): void {
     this.userSubscription.unsubscribe();
+    this.routeSubscription.unsubscribe();
     document.removeEventListener('click', this.handleClickOutside.bind(this));
   }
 
-  private loadUserProfileData(): void {
-    if (this.currentUser) {
-      if (this.currentUser.avatar) {
-        this.userAvatar = this.getProxyImageUrl(this.currentUser.avatar) || this.userAvatar;
+  private loadOtherUserProfile(username: string): void {
+    this.isLoadingProfile = true;
+    this.userService.getUserByUsername(username).subscribe({
+      next: (user) => {
+        this.profileUser = user;
+        this.loadUserProfileData();
+        this.loadUserPosts();
+        this.isLoadingProfile = false;
+      },
+      error: (error) => {
+        console.error('Error loading user profile:', error);
+        this.isLoadingProfile = false;
       }
-      if (this.currentUser.coverPhoto) {
-        this.userCoverPhoto = this.getProxyImageUrl(this.currentUser.coverPhoto) || this.userCoverPhoto;
+    });
+  }
+
+  private loadUserProfileData(): void {
+    if (this.profileUser) {
+      const avatar = this.profileUser.avatar || this.profileUser.avatarUrl;
+      const coverPhoto = this.profileUser.coverPhoto || this.profileUser.coverImageUrl;
+      
+      if (avatar) {
+        this.userAvatar = this.getProxyImageUrl(avatar) || this.userAvatar;
+      }
+      if (coverPhoto) {
+        this.userCoverPhoto = this.getProxyImageUrl(coverPhoto) || this.userCoverPhoto;
       }
     }
   }
 
   private loadUserPosts(): void {
-    if (this.currentUser) {
-      console.log('Loading posts for user:', this.currentUser.username);
+    if (this.profileUser) {
+      const username = this.profileUser.username;
+      console.log('Loading posts for user:', username);
       this.isLoadingPosts = true;
-      this.postService.getPostsByUser(this.currentUser.username).subscribe({
+      this.postService.getPostsByUser(username).subscribe({
         next: (posts) => {
           console.log('Received posts:', posts);
           this.userPosts = posts;

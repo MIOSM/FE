@@ -1,4 +1,4 @@
-<div class="profile-page" *ngIf="currentUser">
+<div class="profile-page" *ngIf="profileUser">
   <div class="profile-header">
     <div class="cover-photo">
       <img [src]="userCoverPhoto" alt="Cover Photo" class="cover-image" />
@@ -9,18 +9,21 @@
         <div class="avatar-container">
           <img [src]="userAvatar" alt="Profile Picture" class="avatar-image" />
         </div>
-        <button class="edit-profile-btn" (click)="editProfile()">
+        <button *ngIf="isOwnProfile" class="edit-profile-btn" (click)="editProfile()">
           <i class="fas fa-edit"></i>
           Edit Profile
         </button>
       </div>
 
       <div class="user-details">
-        <h1 class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</h1>
-        <p class="user-username">&#64;{{ currentUser.username }}</p>
+        <h1 class="user-name">
+          <span *ngIf="profileUser.firstName && profileUser.lastName">{{ profileUser.firstName }} {{ profileUser.lastName }}</span>
+          <span *ngIf="!profileUser.firstName || !profileUser.lastName">{{ profileUser.username }}</span>
+        </h1>
+        <p class="user-username">&#64;{{ profileUser.username }}</p>
         
         <div class="user-bio">
-          <p class="bio-text">{{ currentUser.bio }}</p>
+          <p class="bio-text">{{ profileUser.bio }}</p>
         </div>
         
         <div class="user-stats">
@@ -33,15 +36,15 @@
             <span class="stat-label">Followers</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number">0</span>
+            <span class="stat-number">{{ userPosts.length }}</span>
             <span class="stat-label">Posts</span>
           </div>
         </div>
         
-        <div class="user-contact">
+        <div class="user-contact" *ngIf="isOwnProfile && profileUser.email">
           <div class="contact-item">
             <i class="fas fa-envelope"></i>
-            <span>{{ currentUser.email }}</span>
+            <span>{{ profileUser.email }}</span>
           </div>
         </div>
       </div>
@@ -67,13 +70,13 @@
 
   <div class="profile-content">
     <div class="posts-section">
-      <div class="create-post-container" *ngIf="userPosts.length > 0">
+      <div class="create-post-container" *ngIf="isOwnProfile && userPosts.length > 0">
         <button class="create-post-btn" (click)="createPost()">
           <div class="post-avatar" [style.background]="'var(--primary-100)'">
-            <span class="avatar-text" *ngIf="!currentUser.avatar">
-              {{ currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U' }}
+            <span class="avatar-text" *ngIf="!currentUser?.avatar">
+              {{ (currentUser?.username?.charAt(0) || 'U').toUpperCase() }}
             </span>
-            <img [src]="currentUser.avatar" *ngIf="currentUser.avatar" alt="User Avatar" />
+            <img [src]="currentUser?.avatar" *ngIf="currentUser?.avatar" alt="User Avatar" />
           </div>
           <span class="create-post-text">What's on your mind?</span>
         </button>
@@ -88,10 +91,10 @@
         <div class="post-card" *ngFor="let post of userPosts">
           <div class="post-header">
             <div class="post-avatar" [style.background]="'var(--primary-100)'">
-              <span class="avatar-text" *ngIf="!currentUser.avatar">
-                {{ currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U' }}
+              <span class="avatar-text" *ngIf="!profileUser?.avatar && !profileUser?.avatarUrl">
+                {{ (profileUser?.username?.charAt(0) || 'U').toUpperCase() }}
               </span>
-              <img [src]="currentUser.avatar" *ngIf="currentUser.avatar" alt="User Avatar" />
+              <img [src]="userAvatar" *ngIf="profileUser?.avatar || profileUser?.avatarUrl" alt="User Avatar" />
             </div>
             <div class="post-user-info">
               <h4 class="post-username">{{ post.username || 'User' }}</h4>
@@ -204,7 +207,12 @@
   </div>
 </div>
 
-<div class="loading-container" *ngIf="!currentUser">
+<div class="loading-container" *ngIf="!profileUser && !isLoadingProfile">
   <div class="spinner"></div>
   <p>Loading user information...</p>
+</div>
+
+<div class="loading-container" *ngIf="isLoadingProfile">
+  <div class="spinner"></div>
+  <p>Loading profile...</p>
 </div> 
