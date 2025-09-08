@@ -17,12 +17,11 @@ export const routes: Routes = [
     component: LayoutComponent,
     canActivateChild: [authGuard],
     children: [
-      { path: 'profile', component: ProfileComponent },
       { path: 'profile/:username', component: ProfileComponent },
       { path: 'search', component: SearchComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'create-post', component: CreatePostComponent },
-      { path: '', redirectTo: 'profile', pathMatch: 'full' }
+      { path: '', redirectTo: 'search', pathMatch: 'full' }
     ]
   },
 

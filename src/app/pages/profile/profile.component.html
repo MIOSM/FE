@@ -90,14 +90,14 @@
       <div class="posts-list" *ngIf="!isLoadingPosts && userPosts.length > 0">
         <div class="post-card" *ngFor="let post of userPosts">
           <div class="post-header">
-            <div class="post-avatar" [style.background]="'var(--primary-100)'">
+            <div class="post-avatar" [style.background]="'var(--primary-100)'" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">
               <span class="avatar-text" *ngIf="!profileUser?.avatar && !profileUser?.avatarUrl">
                 {{ (profileUser?.username?.charAt(0) || 'U').toUpperCase() }}
               </span>
               <img [src]="userAvatar" *ngIf="profileUser?.avatar || profileUser?.avatarUrl" alt="User Avatar" />
             </div>
             <div class="post-user-info">
-              <h4 class="post-username">{{ post.username || 'User' }}</h4>
+              <h4 class="post-username" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">{{ post.username || 'User' }}</h4>
               <p class="post-time">{{ post.createdAt | date:'medium' }}</p>
             </div>
             <div class="post-actions-right" *ngIf="isCurrentUserPost(post)">

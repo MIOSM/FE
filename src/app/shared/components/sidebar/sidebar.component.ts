@@ -37,6 +37,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.isMediumScreen = window.innerWidth <= 980 && window.innerWidth > 768;
   }
 
+  navigateToProfile(): void {
+    if (this.currentUser?.username) {
+      this.router.navigate(['/profile', this.currentUser.username]);
+    }
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

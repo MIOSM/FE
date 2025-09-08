@@ -55,14 +55,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.routeSubscription = this.route.params.subscribe(params => {
       const username = params['username'];
       if (username) {
-        this.isOwnProfile = false;
-        this.loadOtherUserProfile(username);
-      } else {
-        this.isOwnProfile = true;
-        if (this.currentUser) {
+        if (this.currentUser && username === this.currentUser.username) {
+          this.isOwnProfile = true;
           this.profileUser = this.currentUser;
           this.loadUserProfileData();
           this.loadUserPosts();
+        } else {
+          this.isOwnProfile = false;
+          this.loadOtherUserProfile(username);
+        }
+      } else {
+        if (this.currentUser?.username) {
+          this.router.navigate(['/profile', this.currentUser.username], { replaceUrl: true });
         }
       }
     });
@@ -237,6 +241,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   createPost(): void {
     this.router.navigate(['/create-post']);
+  }
+
+  navigateToUserProfile(username: string): void {
+    if (username) {
+      this.router.navigate(['/profile', username]);
+    }
   }
 
   logout(): void {

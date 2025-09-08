@@ -143,7 +143,11 @@ export class CreatePostComponent implements OnInit, OnDestroy {
           console.log('Post created successfully:', response);
           alert('Post created successfully!');
           this.resetForm();
-          this.router.navigate(['/profile']);
+          if (this.currentUser?.username) {
+            this.router.navigate(['/profile', this.currentUser.username]);
+          } else {
+            this.router.navigate(['/search']);
+          }
         },
         error: (error) => {
           console.error('Error creating post:', error);
@@ -171,6 +175,10 @@ export class CreatePostComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/profile']);
+    if (this.currentUser?.username) {
+      this.router.navigate(['/profile', this.currentUser.username]);
+    } else {
+      this.router.navigate(['/search']);
+    }
   }
 }
