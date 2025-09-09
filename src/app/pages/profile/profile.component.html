@@ -160,12 +160,18 @@
         <div class="empty-icon">
           <i class="fas fa-feather-alt"></i>
         </div>
-        <h3>No posts yet</h3>
-        <p>When you create posts, they'll show up here.</p>
-        <button class="create-post-btn" (click)="createPost()">
-          <i class="fas fa-plus"></i>
-          Create your first post
-        </button>
+        <ng-container *ngIf="isOwnProfile">
+          <h3>No posts yet</h3>
+          <p>When you create posts, they'll show up here.</p>
+          <button class="create-post-btn" (click)="createPost()">
+            <i class="fas fa-plus"></i>
+            Create your first post
+          </button>
+        </ng-container>
+        <ng-container *ngIf="!isOwnProfile">
+          <h3>No posts yet</h3>
+          <p>{{ profileUser?.username || 'This user' }} hasn't published anything yet.</p>
+        </ng-container>
       </div>
     </div>
   </div>
