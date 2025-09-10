@@ -23,6 +23,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isLoadingPosts: boolean = false;
   isLoadingProfile: boolean = false;
   isOwnProfile: boolean = true;
+  isLoadingUserProfile: boolean = false;
+
+  followersCount: number = 0;
+  followingCount: number = 0;
+  isFollowing: boolean = false;
+  isLoadingFollow: boolean = false;
+
+  showFollowersModal: boolean = false;
+  showFollowingModal: boolean = false;
+  followersList: any[] = [];
+  followingList: any[] = [];
+  isLoadingModal: boolean = false;
 
   showMediaViewer: boolean = false;
   currentMediaIndex: number = 0;
@@ -49,22 +61,42 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.currentUser = user;
       if (!this.currentUser) {
         this.router.navigate(['/login']);
+      } else if (!this.currentUser.id && !this.isLoadingUserProfile) {
+        this.isLoadingUserProfile = true;
+        this.authService.getUserProfile().subscribe({
+          next: (fullUser) => {
+            this.currentUser = fullUser;
+            this.isLoadingUserProfile = false;
+            console.log('Updated currentUser with full profile:', this.currentUser);
+          },
+          error: (error) => {
+            console.error('Error fetching user profile:', error);
+            this.isLoadingUserProfile = false;
+          }
+        });
       }
     });
 
     this.routeSubscription = this.route.params.subscribe(params => {
       const username = params['username'];
+      console.log('Route params - username:', username);
+      console.log('Current user:', this.currentUser);
+      
       if (username) {
         if (this.currentUser && username === this.currentUser.username) {
+          console.log('Loading own profile');
           this.isOwnProfile = true;
           this.profileUser = this.currentUser;
           this.loadUserProfileData();
           this.loadUserPosts();
+          this.loadSubscriptionData();
         } else {
+          console.log('Loading other user profile');
           this.isOwnProfile = false;
           this.loadOtherUserProfile(username);
         }
       } else {
+        console.log('No username in route, redirecting to own profile');
         if (this.currentUser?.username) {
           this.router.navigate(['/profile', this.currentUser.username], { replaceUrl: true });
         }
@@ -85,6 +117,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.profileUser = user;
         this.loadUserProfileData();
         this.loadUserPosts();
+        this.loadSubscriptionData();
         this.isLoadingProfile = false;
       },
       error: (error) => {
@@ -252,5 +285,232 @@ export class ProfileComponent implements OnInit, OnDestroy {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  private loadSubscriptionData(): void {
+    
+    let userId = this.profileUser?.id || this.currentUser?.id;
+    
+    if (!userId && (this.profileUser?.username || this.currentUser?.username)) {
+      const username = this.profileUser?.username || this.currentUser?.username;
+      this.userService.getUserByUsername(username!).subscribe({
+        next: (user) => {
+          if (this.isOwnProfile) {
+            this.currentUser = { ...this.currentUser!, id: user.id } as User;
+            this.profileUser = this.currentUser;
+          } else {
+            this.profileUser = user;
+          }
+          this.loadSubscriptionDataWithId(user.id);
+        },
+        error: (error) => {
+          console.error('Error getting user by username for subscription data:', error);
+        }
+      });
+      return;
+    }
+    
+    if (!userId) {
+      console.warn('No user ID available for subscription data');
+      return;
+    }
+
+    this.loadSubscriptionDataWithId(userId);
+  }
+
+  private loadSubscriptionDataWithId(userId: string): void {
+    this.userService.getFollowersCount(userId).subscribe({
+      next: (response) => {
+        this.followersCount = response.count;
+        console.log('Loaded followers count:', response.count);
+      },
+      error: (error) => {
+        console.error('Error loading followers count:', error);
+        this.followersCount = 0;
+      }
+    });
+
+    this.userService.getFollowingCount(userId).subscribe({
+      next: (response) => {
+        this.followingCount = response.count;
+        console.log('Loaded following count:', response.count);
+      },
+      error: (error) => {
+        console.error('Error loading following count:', error);
+        this.followingCount = 0;
+      }
+    });
+
+    if (!this.isOwnProfile && this.currentUser?.id && userId) {
+      this.userService.isFollowing(this.currentUser.id, userId).subscribe({
+        next: (response) => {
+          this.isFollowing = response.isFollowing;
+        },
+        error: (error) => {
+          console.error('Error checking follow status:', error);
+        }
+      });
+    } else if (this.isOwnProfile) {
+      this.isFollowing = false;
+    }
+  }
+
+  toggleFollow(): void {
+    console.log('toggleFollow() called');
+    console.log('currentUser:', this.currentUser);
+    console.log('profileUser:', this.profileUser);
+    console.log('isLoadingFollow:', this.isLoadingFollow);
+    console.log('isOwnProfile:', this.isOwnProfile);
+
+    if (!this.currentUser?.id && this.currentUser?.username) {
+      console.log('Attempting to get currentUser by username');
+      this.userService.getUserByUsername(this.currentUser.username).subscribe({
+        next: (user) => {
+          this.currentUser = { ...this.currentUser!, id: user.id } as User;
+          console.log('Updated currentUser with id:', this.currentUser);
+          this.executeFollowAction();
+        },
+        error: (error) => {
+          console.error('Error getting current user by username:', error);
+        }
+      });
+      return;
+    }
+    
+    if (!this.currentUser?.id || !this.profileUser?.id || this.isLoadingFollow) {
+      console.log('Early return - missing data or loading');
+      return;
+    }
+
+    this.executeFollowAction();
+  }
+
+  private executeFollowAction(): void {
+    if (!this.currentUser?.id || !this.profileUser?.id || this.isLoadingFollow) {
+      return;
+    }
+
+    this.isLoadingFollow = true;
+    console.log('Starting follow action, isFollowing:', this.isFollowing);
+
+    const action = this.isFollowing 
+      ? this.userService.unfollowUser(this.currentUser.id, this.profileUser.id)
+      : this.userService.followUser(this.currentUser.id, this.profileUser.id);
+
+    action.subscribe({
+      next: () => {
+        console.log('Follow action successful');
+        this.isFollowing = !this.isFollowing;
+        this.loadSubscriptionData();
+        this.isLoadingFollow = false;
+        console.log('New follow status:', this.isFollowing);
+      },
+      error: (error) => {
+        console.error('Error toggling follow:', error);
+        this.isLoadingFollow = false;
+      }
+    });
+  }
+
+  openFollowersModal(): void {
+    let userId = this.profileUser?.id || this.currentUser?.id;
+    
+    if (!userId && this.currentUser?.username) {
+      this.userService.getUserByUsername(this.currentUser.username).subscribe({
+        next: (user) => {
+          this.currentUser = { ...this.currentUser!, id: user.id } as User;
+          this.openFollowersModalWithId(user.id);
+        },
+        error: (error) => {
+          console.error('Error getting current user by username:', error);
+        }
+      });
+      return;
+    }
+    
+    if (!userId) {
+      console.error('No user ID available for followers modal');
+      return;
+    }
+    
+    this.openFollowersModalWithId(userId);
+  }
+
+  private openFollowersModalWithId(userId: string): void {
+    this.showFollowersModal = true;
+    this.isLoadingModal = true;
+    this.followersList = [];
+    
+    this.userService.getFollowers(userId).subscribe({
+      next: (followers) => {
+        this.followersList = followers;
+        this.isLoadingModal = false;
+      },
+      error: (error) => {
+        console.error('Error loading followers:', error);
+        this.isLoadingModal = false;
+      }
+    });
+  }
+
+  openFollowingModal(): void {
+    let userId = this.profileUser?.id || this.currentUser?.id;
+    
+    if (!userId && this.currentUser?.username) {
+      this.userService.getUserByUsername(this.currentUser.username).subscribe({
+        next: (user) => {
+          this.currentUser = { ...this.currentUser!, id: user.id } as User;
+          this.openFollowingModalWithId(user.id);
+        },
+        error: (error) => {
+          console.error('Error getting current user by username:', error);
+        }
+      });
+      return;
+    }
+    
+    if (!userId) {
+      console.error('No user ID available for following modal');
+      return;
+    }
+    
+    this.openFollowingModalWithId(userId);
+  }
+
+  private openFollowingModalWithId(userId: string): void {
+    this.showFollowingModal = true;
+    this.isLoadingModal = true;
+    this.followingList = [];
+    
+    this.userService.getFollowing(userId).subscribe({
+      next: (following) => {
+        this.followingList = following;
+        this.isLoadingModal = false;
+      },
+      error: (error) => {
+        console.error('Error loading following:', error);
+        this.isLoadingModal = false;
+      }
+    });
+  }
+
+  closeFollowersModal(): void {
+    this.showFollowersModal = false;
+    this.followersList = [];
+  }
+
+  closeFollowingModal(): void {
+    this.showFollowingModal = false;
+    this.followingList = [];
+  }
+
+  getUserAvatarUrl(user: any): string {
+    return this.userService.getAvatarProxyUrl(user.avatarUrl);
+  }
+
+  navigateToUser(username: string): void {
+    this.closeFollowersModal();
+    this.closeFollowingModal();
+    this.router.navigate(['/profile', username]);
   }
 }

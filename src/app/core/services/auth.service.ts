@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 export interface User {
+  id?: string;
   username: string;
   email: string;
   firstName: string;

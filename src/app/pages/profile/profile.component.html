@@ -13,6 +13,16 @@
           <i class="fas fa-edit"></i>
           Edit Profile
         </button>
+        <button *ngIf="!isOwnProfile" class="follow-btn" 
+                [class.following]="isFollowing"
+                [disabled]="isLoadingFollow"
+                (click)="toggleFollow()">
+          <i class="fas" [class.fa-user-plus]="!isFollowing" [class.fa-user-check]="isFollowing"></i>
+          <span *ngIf="!isLoadingFollow">{{ isFollowing ? 'Following' : 'Follow' }}</span>
+          <span *ngIf="isLoadingFollow">
+            <i class="fas fa-spinner fa-spin"></i>
+          </span>
+        </button>
       </div>
 
       <div class="user-details">
@@ -27,12 +37,12 @@
         </div>
         
         <div class="user-stats">
-          <div class="stat-item">
-            <span class="stat-number">0</span>
+          <div class="stat-item" (click)="openFollowingModal()" style="cursor: pointer;">
+            <span class="stat-number">{{ followingCount }}</span>
             <span class="stat-label">Following</span>
           </div>
-          <div class="stat-item">
-            <span class="stat-number">0</span>
+          <div class="stat-item" (click)="openFollowersModal()" style="cursor: pointer;">
+            <span class="stat-number">{{ followersCount }}</span>
             <span class="stat-label">Followers</span>
           </div>
           <div class="stat-item">
@@ -208,6 +218,68 @@
       
       <div class="media-counter" *ngIf="currentMediaUrls.length > 1">
         {{ currentMediaIndex + 1 }} / {{ currentMediaUrls.length }}
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showFollowersModal" (click)="closeFollowersModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Followers</h3>
+        <button class="close-button" (click)="closeFollowersModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="loading-container" *ngIf="isLoadingModal">
+          <div class="spinner"></div>
+          <p>Loading followers...</p>
+        </div>
+        <div class="users-list" *ngIf="!isLoadingModal">
+          <div class="user-item" *ngFor="let user of followersList" (click)="navigateToUser(user.username)">
+            <div class="user-avatar">
+              <img [src]="getUserAvatarUrl(user)" [alt]="user.username" />
+            </div>
+            <div class="user-info">
+              <h4 class="username">{{ user.username }}</h4>
+              <p class="bio" *ngIf="user.bio">{{ user.bio }}</p>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="followersList.length === 0">
+            <p>No followers yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showFollowingModal" (click)="closeFollowingModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Following</h3>
+        <button class="close-button" (click)="closeFollowingModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="loading-container" *ngIf="isLoadingModal">
+          <div class="spinner"></div>
+          <p>Loading following...</p>
+        </div>
+        <div class="users-list" *ngIf="!isLoadingModal">
+          <div class="user-item" *ngFor="let user of followingList" (click)="navigateToUser(user.username)">
+            <div class="user-avatar">
+              <img [src]="getUserAvatarUrl(user)" [alt]="user.username" />
+            </div>
+            <div class="user-info">
+              <h4 class="username">{{ user.username }}</h4>
+              <p class="bio" *ngIf="user.bio">{{ user.bio }}</p>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="followingList.length === 0">
+            <p>Not following anyone yet</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

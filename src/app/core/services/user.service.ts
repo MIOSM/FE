@@ -97,4 +97,96 @@ export class UserService {
     
     return avatarUrl;
   }
+
+  // Subscription methods
+  followUser(followerId: string, followingId: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.post(`${this.API_URL}/${followerId}/follow/${followingId}`, {}, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error following user:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  unfollowUser(followerId: string, followingId: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.delete(`${this.API_URL}/${followerId}/follow/${followingId}`, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error unfollowing user:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  isFollowing(followerId: string, followingId: string): Observable<{isFollowing: boolean}> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<{isFollowing: boolean}>(`${this.API_URL}/${followerId}/following/${followingId}`, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error checking if following user:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getFollowers(userId: string): Observable<SearchUser[]> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<SearchUser[]>(`${this.API_URL}/${userId}/followers`, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error getting followers:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getFollowing(userId: string): Observable<SearchUser[]> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<SearchUser[]>(`${this.API_URL}/${userId}/following`, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error getting following list:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getFollowersCount(userId: string): Observable<{count: number}> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<{count: number}>(`${this.API_URL}/${userId}/followers/count`, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error getting followers count:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getFollowingCount(userId: string): Observable<{count: number}> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<{count: number}>(`${this.API_URL}/${userId}/following/count`, { 
+      headers 
+    }).pipe(
+      catchError(error => {
+        console.error('Error getting following count:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 }
