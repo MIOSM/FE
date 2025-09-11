@@ -1,0 +1,99 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">
+      <i class="fas fa-home"></i>
+      Dashboard
+    </h1>
+    <button class="refresh-btn" (click)="onRefresh()" [disabled]="loading">
+      <i class="fas fa-sync-alt" [class.spinning]="loading"></i>
+    </button>
+  </div>
+
+  <div class="feed-container">
+    <div *ngIf="loading && posts.length === 0" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading latest posts...</p>
+    </div>
+
+    <div *ngIf="error" class="error-container">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <p class="error-message">{{ error }}</p>
+      <button class="retry-btn" (click)="onRefresh()">
+        <i class="fas fa-redo"></i>
+        Try Again
+      </button>
+    </div>
+
+    <div *ngIf="!loading && !error && posts.length === 0" class="empty-container">
+      <i class="fas fa-newspaper empty-icon"></i>
+      <h3 class="empty-title">No posts yet</h3>
+      <p class="empty-message">Be the first to share something!</p>
+    </div>
+
+    <div *ngIf="!loading && !error && posts.length > 0" class="posts-feed">
+      <article *ngFor="let post of posts; trackBy: trackByPostId" class="post-card">
+        <header class="post-header">
+          <div class="post-avatar" (click)="navigateToProfile(post.username)">
+            <img 
+              *ngIf="post.userAvatar" 
+              [src]="getAvatarUrl(post.userAvatar)" 
+              [alt]="post.username + ' avatar'"
+              onerror="this.src='/assets/default-avatar.png'"
+            />
+            <div *ngIf="!post.userAvatar" class="avatar-text">
+              {{ post.username.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+          <div class="post-user-info">
+            <span class="post-username" (click)="navigateToProfile(post.username)">{{ post.username }}</span>
+            <time class="post-time">{{ formatDate(post.createdAt) }}</time>
+          </div>
+        </header>
+
+        <div class="post-content">
+          <p class="post-text">{{ post.content }}</p>
+
+          <div 
+            class="post-images {{ 'image-count-' + post.imageUrls.length }}" 
+            *ngIf="post.imageUrls && post.imageUrls.length > 0"
+          >
+            <img 
+              *ngFor="let imageUrl of post.imageUrls; let i = index" 
+              [src]="getImageProxyUrl(imageUrl)"
+              [alt]="'Post image ' + (i + 1)"
+              class="post-image"
+              (error)="onImageError($event)"
+            />
+          </div>
+
+          <div *ngIf="post.videoUrls && post.videoUrls.length > 0" class="post-videos">
+            <video 
+              *ngFor="let videoUrl of post.videoUrls" 
+              [src]="getImageProxyUrl(videoUrl)"
+              class="post-video"
+              controls
+              preload="metadata"
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+
+          <div class="post-actions">
+            <button class="action-btn like-btn">
+              <i class="far fa-heart"></i>
+              <span>Like</span>
+            </button>
+            <button class="action-btn comment-btn">
+              <i class="far fa-comment"></i>
+              <span>Comment</span>
+            </button>
+            <button class="action-btn share-btn">
+              <i class="fas fa-share"></i>
+              <span>Share</span>
+            </button>
+          </div>
+      </article>
+    </div>
+  </div>
+</div>

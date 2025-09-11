@@ -98,7 +98,6 @@ export class UserService {
     return avatarUrl;
   }
 
-  // Subscription methods
   followUser(followerId: string, followingId: string): Observable<any> {
     const headers = this.getAuthHeaders();
     

@@ -56,6 +56,9 @@ export class PostService {
     const formData = new FormData();
     formData.append('userId', currentUser.username);
     formData.append('username', currentUser.username);
+    if (currentUser.avatar) {
+      formData.append('userAvatar', currentUser.avatar);
+    }
     formData.append('content', content);
 
     const images = mediaFiles.filter(file => file.type.startsWith('image/'));
@@ -133,5 +136,32 @@ export class PostService {
     return this.http.get<PostResponse>(`${this.apiUrl}/api/posts/${postId}`, {
       headers: this.getAuthHeaders()
     });
+  }
+
+  getLatestPosts(limit: number = 10): Observable<PostResponse[]> {
+    const url = `${this.apiUrl}/api/posts/latest?limit=${limit}`;
+    console.log('Fetching latest posts from URL:', url);
+    
+    return this.http.get<PostResponse[]>(url, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      tap((rawPosts: any) => console.log('Raw latest posts from API:', JSON.stringify(rawPosts, null, 2))),
+      map((posts: any[]) => 
+        posts.map(post => {
+          console.log('Original createdAt:', post.createdAt, 'type:', typeof post.createdAt);
+          const parsedPost = {
+            ...post,
+            createdAt: new Date(post.createdAt),
+            updatedAt: new Date(post.updatedAt)
+          };
+          console.log('Parsed post:', parsedPost);
+          return parsedPost;
+        })
+      ),
+      tap({
+        next: (response: PostResponse[]) => console.log('Processed latest posts:', response),
+        error: (error: any) => console.error('Latest posts API error:', error)
+      })
+    );
   }
 }
