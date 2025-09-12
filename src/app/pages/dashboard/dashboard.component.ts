@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PostService, PostResponse } from '../../core/services/post.service';
-import { UserService } from '../../core/services/user.service';
+import { UserService, SearchUser } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
+import { catchError, firstValueFrom } from 'rxjs';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,8 +36,7 @@ export class DashboardComponent implements OnInit {
 
     this.postService.getLatestPosts(10).subscribe({
       next: (posts) => {
-        this.posts = posts;
-        this.loading = false;
+        this.enrichPostsWithAvatars(posts);
       },
       error: (error) => {
         console.error('Error loading latest posts:', error);
@@ -43,6 +44,53 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private async enrichPostsWithAvatars(posts: PostResponse[]): Promise<void> {
+    const usernamesNeedingAvatars = [...new Set(
+      posts
+        .filter(post => !post.userAvatar)
+        .map(post => post.username)
+    )];
+
+    if (usernamesNeedingAvatars.length === 0) {
+      this.posts = posts;
+      this.loading = false;
+      return;
+    }
+
+    try {
+      const userRequests = usernamesNeedingAvatars.map(username =>
+        firstValueFrom(
+          this.userService.getUserByUsername(username).pipe(
+            catchError((error: any) => {
+              console.warn(`Failed to fetch user data for ${username}:`, error);
+              return of(null);
+            })
+          )
+        )
+      );
+
+      const users = await Promise.all(userRequests);
+
+      const avatarMap = new Map<string, string>();
+      users.forEach((user: SearchUser | null) => {
+        if (user && user.username) {
+          avatarMap.set(user.username, user.avatarUrl || '');
+        }
+      });
+
+      this.posts = posts.map(post => ({
+        ...post,
+        userAvatar: post.userAvatar || avatarMap.get(post.username) || ''
+      }));
+
+      this.loading = false;
+    } catch (error: any) {
+      console.error('Error enriching posts with avatars:', error);
+      this.posts = posts;
+      this.loading = false;
+    }
   }
 
   getAvatarUrl(avatarUrl: string | null | undefined): string {
