@@ -628,7 +628,6 @@ body {
   }
 }
 
-// Shared Post Styles
 .post-card {
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-primary);
@@ -696,7 +695,6 @@ body {
       }
 
       .avatar-text {
-        color: var(--primary-600);
         font-weight: 700;
         font-size: 1.4rem;
       }

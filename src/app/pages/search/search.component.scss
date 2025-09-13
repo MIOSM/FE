@@ -146,6 +146,23 @@
             object-fit: cover;
             border: 2px solid #e1e5e9;
           }
+
+          .avatar-fallback {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: 2px solid #e1e5e9;
+            transition: transform 0.2s ease;
+
+            &:hover {
+              transform: scale(1.05);
+            }
+          }
         }
 
         .user-info {

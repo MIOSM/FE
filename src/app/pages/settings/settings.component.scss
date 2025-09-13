@@ -68,6 +68,25 @@ textarea.form-control {
         transition: all 0.3s ease;
       }
 
+      .avatar-fallback {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .avatar-initial {
+        font-size: inherit;
+        font-weight: inherit;
+      }
+
       .avatar-overlay {
         position: absolute;
         top: 0;
@@ -153,6 +172,26 @@ textarea.form-control {
         transition: all 0.3s ease;
       }
 
+      .cover-fallback {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+        
+        .cover-pattern {
+          width: 100%;
+          height: 100%;
+          background-image: 
+            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+          background-size: 100px 100px, 150px 150px, 80px 80px;
+          background-position: 0 0, 50px 50px, 25px 25px;
+          animation: float 20s ease-in-out infinite;
+        }
+      }
+
       .cover-overlay {
         position: absolute;
         top: 0;
@@ -198,6 +237,15 @@ textarea.form-control {
         font-style: italic;
       }
     }
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
   }
 }
 

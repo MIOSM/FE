@@ -35,13 +35,16 @@
         <header class="post-header">
           <div class="post-avatar" (click)="navigateToProfile(post.username)">
             <img 
-              *ngIf="post.userAvatar" 
+              *ngIf="hasValidAvatar(post.userAvatar)" 
               [src]="getAvatarUrl(post.userAvatar)" 
               [alt]="post.username + ' avatar'"
-              onerror="this.src='/assets/default-avatar.png'"
+              (error)="onImageError($event)"
             />
-            <div *ngIf="!post.userAvatar" class="avatar-text">
-              {{ post.username.charAt(0).toUpperCase() }}
+            <div *ngIf="!hasValidAvatar(post.userAvatar)" 
+                 class="avatar-fallback" 
+                 [style.background-color]="getAvatarColor(post.username)"
+                 [style.color]="getTextColor(getAvatarColor(post.username))">
+              {{ getAvatarInitial(post.username) }}
             </div>
           </div>
           <div class="post-user-info">

@@ -1,13 +1,19 @@
 <div class="profile-page" *ngIf="profileUser">
   <div class="profile-header">
     <div class="cover-photo">
-      <img [src]="userCoverPhoto" alt="Cover Photo" class="cover-image" />
+      <img *ngIf="hasValidCoverPhoto()" [src]="userCoverPhoto" alt="Cover Photo" class="cover-image" />
+      <div *ngIf="!hasValidCoverPhoto()" class="cover-fallback">
+        <div class="cover-pattern"></div>
+      </div>
     </div>
 
     <div class="profile-info">
       <div class="profile-picture">
         <div class="avatar-container">
-          <img [src]="userAvatar" alt="Profile Picture" class="avatar-image" />
+          <img *ngIf="hasValidAvatar()" [src]="userAvatar" alt="Profile Picture" class="avatar-image" />
+          <div *ngIf="!hasValidAvatar()" class="avatar-fallback" [style.background-color]="getAvatarColor()">
+            <span class="avatar-initial">{{ getAvatarInitial() }}</span>
+          </div>
         </div>
         <button *ngIf="isOwnProfile" class="edit-profile-btn" (click)="editProfile()">
           <i class="fas fa-edit"></i>
@@ -82,11 +88,11 @@
     <div class="posts-section">
       <div class="create-post-container" *ngIf="isOwnProfile && userPosts.length > 0">
         <button class="create-post-btn" (click)="createPost()">
-          <div class="post-avatar" [style.background]="'var(--primary-100)'">
-            <span class="avatar-text" *ngIf="!currentUser?.avatar">
+          <div class="post-avatar">
+            <img *ngIf="currentUser?.avatar" [src]="getUserAvatarUrl(currentUser)" alt="User Avatar" />
+            <div *ngIf="!currentUser?.avatar" class="avatar-text" [style.background-color]="getAvatarColor()">
               {{ (currentUser?.username?.charAt(0) || 'U').toUpperCase() }}
-            </span>
-            <img [src]="currentUser?.avatar" *ngIf="currentUser?.avatar" alt="User Avatar" />
+            </div>
           </div>
           <span class="create-post-text">What's on your mind?</span>
         </button>
@@ -100,11 +106,11 @@
       <div class="posts-list" *ngIf="!isLoadingPosts && userPosts.length > 0">
         <div class="post-card" *ngFor="let post of userPosts">
           <div class="post-header">
-            <div class="post-avatar" [style.background]="'var(--primary-100)'" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">
-              <span class="avatar-text" *ngIf="!profileUser?.avatar && !profileUser?.avatarUrl">
-                {{ (profileUser?.username?.charAt(0) || 'U').toUpperCase() }}
-              </span>
-              <img [src]="userAvatar" *ngIf="profileUser?.avatar || profileUser?.avatarUrl" alt="User Avatar" />
+            <div class="post-avatar" [style.background-color]="getAvatarColor()" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">
+              <img *ngIf="hasValidAvatar()" [src]="userAvatar" alt="User Avatar" />
+              <div *ngIf="!hasValidAvatar()" class="avatar-text" [style.color]="getTextColor(getAvatarColor())">
+                {{ getAvatarInitial() }}
+              </div>
             </div>
             <div class="post-user-info">
               <h4 class="post-username" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">{{ post.username || 'User' }}</h4>
@@ -238,7 +244,10 @@
         <div class="users-list" *ngIf="!isLoadingModal">
           <div class="user-item" *ngFor="let user of followersList" (click)="navigateToUser(user.username)">
             <div class="user-avatar">
-              <img [src]="getUserAvatarUrl(user)" [alt]="user.username" />
+              <img *ngIf="user.avatarUrl" [src]="getUserAvatarUrl(user)" [alt]="user.username" />
+              <div *ngIf="!user.avatarUrl" class="avatar-fallback-small">
+                <span class="avatar-initial-small">{{ user.username.charAt(0).toUpperCase() }}</span>
+              </div>
             </div>
             <div class="user-info">
               <h4 class="username">{{ user.username }}</h4>
@@ -269,7 +278,10 @@
         <div class="users-list" *ngIf="!isLoadingModal">
           <div class="user-item" *ngFor="let user of followingList" (click)="navigateToUser(user.username)">
             <div class="user-avatar">
-              <img [src]="getUserAvatarUrl(user)" [alt]="user.username" />
+              <img *ngIf="user.avatarUrl" [src]="getUserAvatarUrl(user)" [alt]="user.username" />
+              <div *ngIf="!user.avatarUrl" class="avatar-fallback-small">
+                <span class="avatar-initial-small">{{ user.username.charAt(0).toUpperCase() }}</span>
+              </div>
             </div>
             <div class="user-info">
               <h4 class="username">{{ user.username }}</h4>

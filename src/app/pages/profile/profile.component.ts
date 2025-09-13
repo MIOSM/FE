@@ -42,8 +42,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentMediaType: 'image' | 'video' = 'image';
   openMenuPostId: string | null = null;
 
-  userAvatar: string = 'https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=JD';
-  userCoverPhoto: string = 'https://via.placeholder.com/1200x300/2C3E50/FFFFFF?text=Cover+Photo';
+  userAvatar: string | null = null;
+  userCoverPhoto: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -132,12 +132,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       const avatar = this.profileUser.avatar || this.profileUser.avatarUrl;
       const coverPhoto = this.profileUser.coverPhoto || this.profileUser.coverImageUrl;
       
-      if (avatar) {
-        this.userAvatar = this.getProxyImageUrl(avatar) || this.userAvatar;
-      }
-      if (coverPhoto) {
-        this.userCoverPhoto = this.getProxyImageUrl(coverPhoto) || this.userCoverPhoto;
-      }
+      this.userAvatar = avatar ? this.getProxyImageUrl(avatar) : null;
+      this.userCoverPhoto = coverPhoto ? this.getProxyImageUrl(coverPhoto) : null;
     }
   }
 
@@ -512,5 +508,51 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.closeFollowersModal();
     this.closeFollowingModal();
     this.router.navigate(['/profile', username]);
+  }
+
+  getAvatarInitial(): string {
+    if (this.profileUser?.username) {
+      return this.profileUser.username.charAt(0).toUpperCase();
+    }
+    return 'U';
+  }
+
+  getAvatarColor(): string {
+    if (!this.profileUser?.username) {
+      return 'var(--primary-500)';
+    }
+
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+      '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < this.profileUser.username.length; i++) {
+      hash = this.profileUser.username.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  getTextColor(backgroundColor: string): string {
+
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance > 0.5 ? '#333333' : '#FFFFFF';
+  }
+
+  hasValidAvatar(): boolean {
+    return !!(this.userAvatar && this.userAvatar.trim());
+  }
+
+  hasValidCoverPhoto(): boolean {
+    return !!(this.userCoverPhoto && this.userCoverPhoto.trim());
   }
 }

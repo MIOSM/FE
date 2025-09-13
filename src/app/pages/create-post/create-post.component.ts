@@ -60,12 +60,53 @@ export class CreatePostComponent implements OnInit, OnDestroy {
            this.postText.length <= this.maxCharacters;
   }
 
-  get userAvatar(): string {
+  get userAvatar(): string | null {
     if (this.currentUser?.avatar) {
-      const proxyUrl = this.getProxyImageUrl(this.currentUser.avatar);
-      return proxyUrl || 'https://via.placeholder.com/40x40/4A90E2/FFFFFF?text=U';
+      return this.getProxyImageUrl(this.currentUser.avatar);
     }
-    return 'https://via.placeholder.com/40x40/4A90E2/FFFFFF?text=U';
+    return null;
+  }
+
+  hasValidAvatar(): boolean {
+    return !!(this.userAvatar && this.userAvatar.trim());
+  }
+
+  getAvatarInitial(): string {
+    if (this.currentUser?.username) {
+      return this.currentUser.username.charAt(0).toUpperCase();
+    }
+    return 'U';
+  }
+
+  getAvatarColor(): string {
+    if (!this.currentUser?.username) {
+      return 'var(--primary-500)';
+    }
+    
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+      '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < this.currentUser.username.length; i++) {
+      hash = this.currentUser.username.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  getTextColor(backgroundColor: string): string {
+
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance > 0.5 ? '#333333' : '#FFFFFF';
   }
 
   private getProxyImageUrl(imageUrl: string | null | undefined): string | null {

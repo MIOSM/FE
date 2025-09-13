@@ -20,7 +20,12 @@
   <div class="post-form">
     <div class="user-info">
       <div class="user-avatar">
-        <img [src]="userAvatar" alt="Your avatar" />
+        <img *ngIf="hasValidAvatar()" [src]="userAvatar" alt="Your avatar" />
+        <div *ngIf="!hasValidAvatar()" class="avatar-fallback" 
+             [style.background-color]="getAvatarColor()"
+             [style.color]="getTextColor(getAvatarColor())">
+          <span class="avatar-initial">{{ getAvatarInitial() }}</span>
+        </div>
       </div>
       <div class="user-details">
         <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>

@@ -282,32 +282,82 @@ export class SettingsComponent implements OnInit {
     this.showCoverModal = false;
   }
 
-  getCurrentAvatarUrl(): string {
+  getCurrentAvatarUrl(): string | null {
     const url = this.settingsForm.get('avatar')?.value || '';
     if (url.startsWith('data:')) {
       return url; 
     }
     if (url && url.startsWith('http://localhost:9000/user-images/')) {
-      return this.getProxyImageUrl(url) || url; 
+      return this.getProxyImageUrl(url); 
     }
-    return url; 
+    return url || null; 
   }
 
-  getCurrentCoverUrl(): string {
+  getCurrentCoverUrl(): string | null {
     const url = this.settingsForm.get('coverPhoto')?.value || '';
     if (url.startsWith('data:')) {
       return url; 
     }
     if (url && url.startsWith('http://localhost:9000/user-images/')) {
-      return this.getProxyImageUrl(url) || url; 
+      return this.getProxyImageUrl(url); 
     }
-    return url; 
+    return url || null; 
   }
 
   onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     if (target) {
-      target.src = 'assets/default-avatar.png';
+      target.style.display = 'none';
     }
+  }
+
+  hasValidAvatar(): boolean {
+    const url = this.getCurrentAvatarUrl();
+    return !!(url && url.trim());
+  }
+
+  hasValidCover(): boolean {
+    const url = this.getCurrentCoverUrl();
+    return !!(url && url.trim());
+  }
+
+  getAvatarInitial(): string {
+    const username = this.settingsForm.get('username')?.value;
+    if (username) {
+      return username.charAt(0).toUpperCase();
+    }
+    return 'U';
+  }
+
+  getAvatarColor(): string {
+    const username = this.settingsForm.get('username')?.value;
+    if (!username) {
+      return 'var(--primary-500)';
+    }
+    
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+      '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+      hash = username.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  getTextColor(backgroundColor: string): string {
+
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance > 0.5 ? '#333333' : '#FFFFFF';
   }
 }

@@ -42,10 +42,17 @@
           (click)="viewUserProfile(user)">
           <div class="user-avatar">
             <img 
+              *ngIf="hasValidAvatar(user.avatarUrl)"
               [src]="getUserAvatarUrl(user)" 
               [alt]="user.username + ' avatar'"
               class="avatar-img"
               (error)="onImageError($event)">
+            <div *ngIf="!hasValidAvatar(user.avatarUrl)" 
+                 class="avatar-fallback" 
+                 [style.background-color]="getAvatarColor(user.username)"
+                 [style.color]="getTextColor(getAvatarColor(user.username))">
+              {{ getAvatarInitial(user.username) }}
+            </div>
           </div>
           
           <div class="user-info">

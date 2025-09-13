@@ -54,11 +54,17 @@
         <div class="avatar-upload-container">
           <div class="avatar-preview" (click)="openAvatarModal()">
             <img 
-              [src]="getCurrentAvatarUrl() || 'assets/default-avatar.png'" 
+              *ngIf="hasValidAvatar()"
+              [src]="getCurrentAvatarUrl()" 
               alt="Avatar" 
               class="avatar-image"
               (error)="onImageError($event)"
             />
+            <div *ngIf="!hasValidAvatar()" class="avatar-fallback" 
+                 [style.background-color]="getAvatarColor()"
+                 [style.color]="getTextColor(getAvatarColor())">
+              <span class="avatar-initial">{{ getAvatarInitial() }}</span>
+            </div>
             <div class="avatar-overlay">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -80,11 +86,15 @@
         <div class="cover-upload-container">
           <div class="cover-preview" (click)="openCoverModal()">
             <img 
-              [src]="getCurrentCoverUrl() || 'assets/default-cover.png'" 
+              *ngIf="hasValidCover()"
+              [src]="getCurrentCoverUrl()" 
               alt="Cover Photo" 
               class="cover-image"
               (error)="onImageError($event)"
             />
+            <div *ngIf="!hasValidCover()" class="cover-fallback">
+              <div class="cover-pattern"></div>
+            </div>
             <div class="cover-overlay">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -141,7 +151,7 @@
   <app-image-upload-modal
     [isOpen]="showAvatarModal"
     [title]="'Upload Avatar'"
-    [currentImageUrl]="getCurrentAvatarUrl()"
+    [currentImageUrl]="getCurrentAvatarUrl() || ''"
     (closeModal)="closeAvatarModal()"
     (imageSelected)="onAvatarSelected($event)"
   ></app-image-upload-modal>
@@ -149,7 +159,7 @@
   <app-image-upload-modal
     [isOpen]="showCoverModal"
     [title]="'Upload Cover Photo'"
-    [currentImageUrl]="getCurrentCoverUrl()"
+    [currentImageUrl]="getCurrentCoverUrl() || ''"
     (closeModal)="closeCoverModal()"
     (imageSelected)="onCoverSelected($event)"
   ></app-image-upload-modal>
