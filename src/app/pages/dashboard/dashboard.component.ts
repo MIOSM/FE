@@ -18,6 +18,7 @@ export class DashboardComponent implements OnInit {
   posts: PostResponse[] = [];
   loading = true;
   error: string | null = null;
+  likingPosts = new Set<string>();
 
   constructor(
     private postService: PostService,
@@ -198,5 +199,39 @@ export class DashboardComponent implements OnInit {
 
   navigateToProfile(username: string): void {
     this.router.navigate(['/profile', username]);
+  }
+
+  async toggleLike(post: PostResponse): Promise<void> {
+    if (this.likingPosts.has(post.postId)) {
+      return; 
+    }
+
+    this.likingPosts.add(post.postId);
+
+    try {
+      if (post.isLikedByCurrentUser) {
+
+        const response = await firstValueFrom(this.postService.unlikePost(post.postId));
+        if (response.success) {
+          post.isLikedByCurrentUser = false;
+          post.likeCount = Math.max(0, post.likeCount - 1);
+        }
+      } else {
+
+        const response = await firstValueFrom(this.postService.likePost(post.postId));
+        if (response.success) {
+          post.isLikedByCurrentUser = true;
+          post.likeCount = (post.likeCount || 0) + 1;
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    } finally {
+      this.likingPosts.delete(post.postId);
+    }
+  }
+
+  isLiking(postId: string): boolean {
+    return this.likingPosts.has(postId);
   }
 }

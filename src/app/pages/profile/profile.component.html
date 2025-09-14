@@ -55,6 +55,10 @@
             <span class="stat-number">{{ userPosts.length }}</span>
             <span class="stat-label">Posts</span>
           </div>
+          <div class="stat-item">
+            <span class="stat-number">{{ totalLikesCount }}</span>
+            <span class="stat-label">Likes</span>
+          </div>
         </div>
         
         <div class="user-contact" *ngIf="isOwnProfile && profileUser.email">
@@ -69,15 +73,15 @@
 
   <div class="profile-nav">
     <div class="nav-tabs">
-      <button class="nav-tab active">
+      <button class="nav-tab" [class.active]="activeTab === 'posts'" (click)="setActiveTab('posts')">
         <i class="fas fa-list"></i>
         <span>Posts</span>
       </button>
-      <button class="nav-tab">
+      <button class="nav-tab" [class.active]="activeTab === 'likes'" (click)="setActiveTab('likes')">
         <i class="fas fa-heart"></i>
         <span>Likes</span>
       </button>
-      <button class="nav-tab">
+      <button class="nav-tab" [class.active]="activeTab === 'bookmarks'" (click)="setActiveTab('bookmarks')">
         <i class="fas fa-bookmark"></i>
         <span>Bookmarks</span>
       </button>
@@ -85,7 +89,7 @@
   </div>
 
   <div class="profile-content">
-    <div class="posts-section">
+    <div class="posts-section" *ngIf="activeTab === 'posts'">
       <div class="create-post-container" *ngIf="isOwnProfile && userPosts.length > 0">
         <button class="create-post-btn" (click)="createPost()">
           <div class="post-avatar">
@@ -157,9 +161,16 @@
           </div>
 
           <div class="post-actions">
-            <button class="action-btn">
-              <i class="fas fa-heart"></i>
-              <span>0</span>
+            <button 
+              class="action-btn like-btn" 
+              [class.liked]="post.isLikedByCurrentUser"
+              [disabled]="isLiking(post.postId)"
+              (click)="toggleLike(post)"
+            >
+              <i class="fas fa-heart" *ngIf="post.isLikedByCurrentUser"></i>
+              <i class="far fa-heart" *ngIf="!post.isLikedByCurrentUser"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="isLiking(post.postId)"></i>
+              <span>{{ post.likeCount || 0 }}</span>
             </button>
             <button class="action-btn">
               <i class="fas fa-comment"></i>
@@ -172,22 +183,174 @@
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="!isLoadingPosts && userPosts.length === 0">
-        <div class="empty-icon">
-          <i class="fas fa-feather-alt"></i>
+      <div class="empty-state posts-empty" *ngIf="!isLoadingPosts && userPosts.length === 0">
+        <div class="empty-icon-container">
+          <div class="empty-icon posts-icon">
+            <i class="fas fa-feather-alt"></i>
+          </div>
+          <div class="empty-icon-bg"></div>
         </div>
-        <ng-container *ngIf="isOwnProfile">
-          <h3>No posts yet</h3>
-          <p>When you create posts, they'll show up here.</p>
-          <button class="create-post-btn" (click)="createPost()">
-            <i class="fas fa-plus"></i>
-            Create your first post
-          </button>
-        </ng-container>
-        <ng-container *ngIf="!isOwnProfile">
-          <h3>No posts yet</h3>
-          <p>{{ profileUser?.username || 'This user' }} hasn't published anything yet.</p>
-        </ng-container>
+        <div class="empty-content">
+          <ng-container *ngIf="isOwnProfile">
+            <h3>No posts yet</h3>
+            <p>Share your thoughts, photos, and moments with your followers. Your posts will appear here.</p>
+            <div class="empty-suggestion">
+              <i class="fas fa-lightbulb"></i>
+              <span>Tip: Click the button below to create your first post and start sharing!</span>
+            </div>
+            <button class="create-post-btn enhanced" (click)="createPost()">
+              <i class="fas fa-plus"></i>
+              Create your first post
+            </button>
+          </ng-container>
+          <ng-container *ngIf="!isOwnProfile">
+            <h3>No posts yet</h3>
+            <p>{{ profileUser?.username || 'This user' }} hasn't shared any posts yet. Check back later for updates!</p>
+            <div class="empty-suggestion">
+              <i class="fas fa-info-circle"></i>
+              <span>New posts from {{ profileUser?.username || 'this user' }} will appear here when they start sharing.</span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div class="likes-section" *ngIf="activeTab === 'likes'">
+      <div class="loading-posts" *ngIf="isLoadingLikedPosts">
+        <div class="spinner"></div>
+        <p>Loading liked posts...</p>
+      </div>
+
+      <div class="posts-list" *ngIf="!isLoadingLikedPosts && likedPosts.length > 0">
+        <div class="post-card" *ngFor="let post of likedPosts">
+          <div class="post-header">
+            <div class="post-avatar" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">
+              <img *ngIf="post.userAvatar" [src]="getPostUserAvatarUrl(post.userAvatar)" alt="User Avatar" />
+              <div *ngIf="!post.userAvatar" class="avatar-text" [style.background-color]="getAvatarColor(post.username)" [style.color]="getTextColor(getAvatarColor(post.username))">
+                {{ getAvatarInitial(post.username) }}
+              </div>
+            </div>
+            <div class="post-user-info">
+              <h4 class="post-username" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">{{ post.username || 'User' }}</h4>
+              <p class="post-time">{{ post.createdAt | date:'medium' }}</p>
+            </div>
+            <div class="post-actions-right" *ngIf="isCurrentUserPost(post)">
+              <button class="action-btn more-options" (click)="togglePostMenu(post.postId, $event)">
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+              <div class="post-dropdown-menu" [class.show]="isMenuOpen(post.postId)">
+                <button class="dropdown-item delete-btn" (click)="onDeletePost(post.postId, $event)">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="post-content">
+            <p class="post-text">{{ post.content }}</p>
+
+            <div 
+              class="post-images {{ 'image-count-' + post.imageUrls.length }} {{ 'image-count-' + post.imageUrls.length }}-images" 
+              *ngIf="post.imageUrls && post.imageUrls.length > 0"
+            >
+              <img 
+                *ngFor="let imageUrl of post.imageUrls; let i = index"
+                [src]="getPostImageUrl(imageUrl)" 
+                alt="Post image" 
+                class="post-image"
+                (click)="openMediaViewer(post.imageUrls, i, 'image')"
+                loading="lazy"
+              >
+            </div>
+
+            <div class="post-videos" *ngIf="post.videoUrls && post.videoUrls.length > 0">
+              <video 
+                *ngFor="let videoUrl of post.videoUrls; let i = index"
+                [src]="getPostImageUrl(videoUrl)"
+                (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
+                controls
+                class="post-video">
+              </video>
+            </div>
+          </div>
+
+          <div class="post-actions">
+            <button 
+              class="action-btn like-btn" 
+              [class.liked]="post.isLikedByCurrentUser"
+              [disabled]="isLiking(post.postId)"
+              (click)="toggleLike(post)"
+            >
+              <i class="fas fa-heart" *ngIf="post.isLikedByCurrentUser"></i>
+              <i class="far fa-heart" *ngIf="!post.isLikedByCurrentUser"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="isLiking(post.postId)"></i>
+              <span>{{ post.likeCount || 0 }}</span>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-comment"></i>
+              <span>0</span>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-share"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state likes-empty" *ngIf="!isLoadingLikedPosts && likedPosts.length === 0">
+        <div class="empty-icon-container">
+          <div class="empty-icon likes-icon">
+            <i class="fas fa-heart"></i>
+          </div>
+          <div class="empty-icon-bg"></div>
+        </div>
+        <div class="empty-content">
+          <ng-container *ngIf="isOwnProfile">
+            <h3>No liked posts yet</h3>
+            <p>When you like posts, they'll appear here so you can easily find them later.</p>
+            <div class="empty-suggestion">
+              <i class="fas fa-lightbulb"></i>
+              <span>Tip: Double-tap or click the heart icon on posts you enjoy!</span>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!isOwnProfile">
+            <h3>No liked posts</h3>
+            <p>{{ profileUser?.username || 'This user' }} hasn't liked any posts yet.</p>
+            <div class="empty-suggestion">
+              <i class="fas fa-info-circle"></i>
+              <span>Liked posts will appear here when they start engaging with content.</span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div class="bookmarks-section" *ngIf="activeTab === 'bookmarks'">
+      <div class="empty-state bookmarks-empty">
+        <div class="empty-icon-container">
+          <div class="empty-icon bookmarks-icon">
+            <i class="fas fa-bookmark"></i>
+          </div>
+          <div class="empty-icon-bg"></div>
+        </div>
+        <div class="empty-content">
+          <ng-container *ngIf="isOwnProfile">
+            <h3>No bookmarks yet</h3>
+            <p>Save posts you want to read later by bookmarking them. They'll appear here for easy access.</p>
+            <div class="empty-suggestion">
+              <i class="fas fa-lightbulb"></i>
+              <span>Tip: Click the bookmark icon on any post to save it for later!</span>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!isOwnProfile">
+            <h3>Bookmarks are private</h3>
+            <p>Only {{ profileUser?.username || 'this user' }} can see their saved posts and bookmarks.</p>
+            <div class="empty-suggestion privacy-note">
+              <i class="fas fa-lock"></i>
+              <span>This section is private to protect user privacy.</span>
+            </div>
+          </ng-container>
+        </div>
       </div>
     </div>
   </div>

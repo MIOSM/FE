@@ -83,9 +83,16 @@
         </div>
 
           <div class="post-actions">
-            <button class="action-btn like-btn">
-              <i class="far fa-heart"></i>
-              <span>Like</span>
+            <button 
+              class="action-btn like-btn" 
+              [class.liked]="post.isLikedByCurrentUser"
+              [disabled]="isLiking(post.postId)"
+              (click)="toggleLike(post)"
+            >
+              <i class="fas fa-heart" *ngIf="post.isLikedByCurrentUser"></i>
+              <i class="far fa-heart" *ngIf="!post.isLikedByCurrentUser"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="isLiking(post.postId)"></i>
+              <span>{{ post.likeCount || 0 }}</span>
             </button>
             <button class="action-btn comment-btn">
               <i class="far fa-comment"></i>

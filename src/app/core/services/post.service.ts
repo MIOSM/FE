@@ -12,6 +12,8 @@ export interface PostResponse {
   content: string;
   imageUrls: string[];
   videoUrls: string[];
+  likeCount: number;
+  isLikedByCurrentUser?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -78,8 +80,16 @@ export class PostService {
   }
 
   getPostsByUser(username: string): Observable<PostResponse[]> {
+    let currentUser: any = null;
+    this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
+    
     const encodedUsername = encodeURIComponent(username);
-    const url = `${this.apiUrl}/api/posts/user/username/${encodedUsername}`;
+    let url = `${this.apiUrl}/api/posts/user/username/${encodedUsername}`;
+
+    if (currentUser?.username) {
+      url += `?currentUserId=${encodeURIComponent(currentUser.username)}`;
+    }
+    
     console.log('Fetching posts from URL:', url);
     
     return this.http.get<PostResponse[]>(url, {
@@ -92,7 +102,9 @@ export class PostService {
           const parsedPost = {
             ...post,
             createdAt: new Date(post.createdAt),
-            updatedAt: new Date(post.updatedAt)
+            updatedAt: new Date(post.updatedAt),
+            likeCount: post.likeCount || 0,
+            isLikedByCurrentUser: post.isLikedByCurrentUser || false
           };
           console.log('Parsed post:', parsedPost);
           return parsedPost;
@@ -139,7 +151,16 @@ export class PostService {
   }
 
   getLatestPosts(limit: number = 10): Observable<PostResponse[]> {
-    const url = `${this.apiUrl}/api/posts/latest?limit=${limit}`;
+    let currentUser: any = null;
+    this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
+    
+    let url = `${this.apiUrl}/api/posts/latest?limit=${limit}`;
+    
+    // Add current user ID for like status if available
+    if (currentUser?.username) {
+      url += `&currentUserId=${encodeURIComponent(currentUser.username)}`;
+    }
+    
     console.log('Fetching latest posts from URL:', url);
     
     return this.http.get<PostResponse[]>(url, {
@@ -152,7 +173,9 @@ export class PostService {
           const parsedPost = {
             ...post,
             createdAt: new Date(post.createdAt),
-            updatedAt: new Date(post.updatedAt)
+            updatedAt: new Date(post.updatedAt),
+            likeCount: post.likeCount || 0,
+            isLikedByCurrentUser: post.isLikedByCurrentUser || false
           };
           console.log('Parsed post:', parsedPost);
           return parsedPost;
@@ -163,5 +186,78 @@ export class PostService {
         error: (error: any) => console.error('Latest posts API error:', error)
       })
     );
+  }
+
+  likePost(postId: string): Observable<any> {
+    let currentUser: any = null;
+    this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
+    
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const params = new URLSearchParams();
+    params.append('userId', currentUser.username);
+    params.append('username', currentUser.username);
+
+    return this.http.post<any>(`${this.apiUrl}/api/posts/${postId}/like?${params.toString()}`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  unlikePost(postId: string): Observable<any> {
+    let currentUser: any = null;
+    this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
+    
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const params = new URLSearchParams();
+    params.append('userId', currentUser.username);
+
+    return this.http.delete<any>(`${this.apiUrl}/api/posts/${postId}/like?${params.toString()}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getLikeStatus(postId: string): Observable<{isLiked: boolean}> {
+    let currentUser: any = null;
+    this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
+    
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const params = new URLSearchParams();
+    params.append('userId', currentUser.username);
+
+    return this.http.get<{isLiked: boolean}>(`${this.apiUrl}/api/posts/${postId}/like-status?${params.toString()}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getLikedPostsByUser(username: string): Observable<PostResponse[]> {
+    const encodedUsername = encodeURIComponent(username);
+    return this.http.get<PostResponse[]>(`${this.apiUrl}/api/posts/liked/user/username/${encodedUsername}`, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      map((posts: any[]) => 
+        posts.map(post => ({
+          ...post,
+          createdAt: new Date(post.createdAt),
+          updatedAt: new Date(post.updatedAt),
+          likeCount: post.likeCount || 0,
+          isLikedByCurrentUser: post.isLikedByCurrentUser || false
+        }))
+      )
+    );
+  }
+
+  getTotalLikesForUserPosts(username: string): Observable<{totalLikes: number}> {
+    const encodedUsername = encodeURIComponent(username);
+    return this.http.get<{totalLikes: number}>(`${this.apiUrl}/api/posts/user/username/${encodedUsername}/total-likes`, {
+      headers: this.getAuthHeaders()
+    });
   }
 }

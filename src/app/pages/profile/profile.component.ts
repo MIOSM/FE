@@ -4,7 +4,7 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { PostService, PostResponse } from '../../core/services/post.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom, catchError, of } from 'rxjs';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
@@ -44,6 +44,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   userAvatar: string | null = null;
   userCoverPhoto: string | null = null;
+
+  activeTab: 'posts' | 'likes' | 'bookmarks' = 'posts';
+  likedPosts: PostResponse[] = [];
+  isLoadingLikedPosts: boolean = false;
+  totalLikesCount: number = 0;
+  likingPosts = new Set<string>();
 
   constructor(
     private authService: AuthService,
@@ -87,9 +93,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
           console.log('Loading own profile');
           this.isOwnProfile = true;
           this.profileUser = this.currentUser;
+          this.likedPosts = [];
+          this.activeTab = 'posts';
           this.loadUserProfileData();
           this.loadUserPosts();
           this.loadSubscriptionData();
+          this.loadTotalLikesCount();
         } else {
           console.log('Loading other user profile');
           this.isOwnProfile = false;
@@ -112,12 +121,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   private loadOtherUserProfile(username: string): void {
     this.isLoadingProfile = true;
+    this.likedPosts = [];
+    this.activeTab = 'posts';
+    
     this.userService.getUserByUsername(username).subscribe({
       next: (user) => {
         this.profileUser = user;
         this.loadUserProfileData();
         this.loadUserPosts();
         this.loadSubscriptionData();
+        this.loadTotalLikesCount();
         this.isLoadingProfile = false;
       },
       error: (error) => {
@@ -510,15 +523,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.router.navigate(['/profile', username]);
   }
 
-  getAvatarInitial(): string {
-    if (this.profileUser?.username) {
-      return this.profileUser.username.charAt(0).toUpperCase();
+  getAvatarInitial(username?: string): string {
+    const targetUsername = username || this.profileUser?.username;
+    if (targetUsername) {
+      return targetUsername.charAt(0).toUpperCase();
     }
     return 'U';
   }
 
-  getAvatarColor(): string {
-    if (!this.profileUser?.username) {
+  getAvatarColor(username?: string): string {
+    const targetUsername = username || this.profileUser?.username;
+    if (!targetUsername) {
       return 'var(--primary-500)';
     }
 
@@ -529,8 +544,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     ];
     
     let hash = 0;
-    for (let i = 0; i < this.profileUser.username.length; i++) {
-      hash = this.profileUser.username.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < targetUsername.length; i++) {
+      hash = targetUsername.charCodeAt(i) + ((hash << 5) - hash);
     }
     
     return colors[Math.abs(hash) % colors.length];
@@ -554,5 +569,144 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   hasValidCoverPhoto(): boolean {
     return !!(this.userCoverPhoto && this.userCoverPhoto.trim());
+  }
+
+  getPostUserAvatarUrl(avatarUrl: string): string {
+    return this.userService.getAvatarProxyUrl(avatarUrl);
+  }
+
+  setActiveTab(tab: 'posts' | 'likes' | 'bookmarks'): void {
+    this.activeTab = tab;
+    
+    if (tab === 'likes') {
+      this.likedPosts = [];
+      this.loadLikedPosts();
+    }
+  }
+
+  private loadLikedPosts(): void {
+    if (!this.profileUser?.username) {
+      console.warn('No username available for liked posts');
+      return;
+    }
+
+    this.isLoadingLikedPosts = true;
+    this.postService.getLikedPostsByUser(this.profileUser.username).subscribe({
+      next: (posts) => {
+        console.log('Loaded liked posts:', posts);
+        this.enrichLikedPostsWithAvatars(posts);
+      },
+      error: (error) => {
+        console.error('Error loading liked posts:', error);
+        this.likedPosts = [];
+        this.isLoadingLikedPosts = false;
+      }
+    });
+  }
+
+  private async enrichLikedPostsWithAvatars(posts: PostResponse[]): Promise<void> {
+    const usernamesNeedingAvatars = [...new Set(
+      posts
+        .filter(post => !post.userAvatar)
+        .map(post => post.username)
+    )];
+
+    if (usernamesNeedingAvatars.length === 0) {
+      this.likedPosts = posts;
+      this.isLoadingLikedPosts = false;
+      return;
+    }
+
+    try {
+      const userRequests = usernamesNeedingAvatars.map(username =>
+        firstValueFrom(
+          this.userService.getUserByUsername(username).pipe(
+            catchError((error: any) => {
+              console.warn(`Failed to fetch user data for ${username}:`, error);
+              return of(null);
+            })
+          )
+        )
+      );
+
+      const users = await Promise.all(userRequests);
+
+      const avatarMap = new Map<string, string>();
+      users.forEach((user: any) => {
+        if (user && user.username) {
+          avatarMap.set(user.username, user.avatarUrl || '');
+        }
+      });
+
+      this.likedPosts = posts.map(post => ({
+        ...post,
+        userAvatar: post.userAvatar || avatarMap.get(post.username) || ''
+      }));
+
+    } catch (error) {
+      console.error('Error enriching posts with avatars:', error);
+      this.likedPosts = posts;
+    } finally {
+      this.isLoadingLikedPosts = false;
+    }
+  }
+
+  private loadTotalLikesCount(): void {
+    if (!this.profileUser?.username) {
+      console.warn('No username available for total likes count');
+      return;
+    }
+
+    this.postService.getTotalLikesForUserPosts(this.profileUser.username).subscribe({
+      next: (response) => {
+        console.log('Total likes response:', response);
+        this.totalLikesCount = response.totalLikes;
+      },
+      error: (error) => {
+        console.error('Error loading total likes count:', error);
+        this.totalLikesCount = 0;
+      }
+    });
+  }
+
+  async toggleLike(post: PostResponse): Promise<void> {
+    if (this.likingPosts.has(post.postId)) {
+      return; 
+    }
+
+    this.likingPosts.add(post.postId);
+
+    try {
+      if (post.isLikedByCurrentUser) {
+
+        const response = await firstValueFrom(this.postService.unlikePost(post.postId));
+        if (response.success) {
+          post.isLikedByCurrentUser = false;
+          post.likeCount = Math.max(0, post.likeCount - 1);
+
+          if (post.userId === this.profileUser?.id) {
+            this.totalLikesCount = Math.max(0, this.totalLikesCount - 1);
+          }
+        }
+      } else {
+        const response = await firstValueFrom(this.postService.likePost(post.postId));
+        if (response.success) {
+          post.isLikedByCurrentUser = true;
+          post.likeCount = (post.likeCount || 0) + 1;
+
+          if (post.userId === this.profileUser?.id) {
+            this.totalLikesCount = (this.totalLikesCount || 0) + 1;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    } finally {
+      this.likingPosts.delete(post.postId);
+    }
+  }
+
+  isLiking(postId: string): boolean {
+    return this.likingPosts.has(postId);
   }
 }
