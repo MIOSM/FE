@@ -89,9 +89,9 @@
       <div class="create-post-container" *ngIf="isOwnProfile && userPosts.length > 0">
         <button class="create-post-btn" (click)="createPost()">
           <div class="post-avatar">
-            <img *ngIf="currentUser?.avatar" [src]="getUserAvatarUrl(currentUser)" alt="User Avatar" />
-            <div *ngIf="!currentUser?.avatar" class="avatar-text" [style.background-color]="getAvatarColor()">
-              {{ (currentUser?.username?.charAt(0) || 'U').toUpperCase() }}
+            <img *ngIf="hasValidAvatar()" [src]="userAvatar" alt="User Avatar" />
+            <div *ngIf="!hasValidAvatar()" class="avatar-text" [style.background-color]="getAvatarColor()">
+              {{ getAvatarInitial() }}
             </div>
           </div>
           <span class="create-post-text">What's on your mind?</span>
