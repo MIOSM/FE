@@ -86,7 +86,10 @@ export class PostService {
     const encodedUsername = encodeURIComponent(username);
     let url = `${this.apiUrl}/api/posts/user/username/${encodedUsername}`;
 
-    if (currentUser?.username) {
+    if (currentUser?.id) {
+      url += `?currentUserId=${encodeURIComponent(currentUser.id)}`;
+    } else if (currentUser?.username) {
+      // Fallback to username if id is not available
       url += `?currentUserId=${encodeURIComponent(currentUser.username)}`;
     }
     
@@ -155,9 +158,10 @@ export class PostService {
     this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
     
     let url = `${this.apiUrl}/api/posts/latest?limit=${limit}`;
-    
-    // Add current user ID for like status if available
-    if (currentUser?.username) {
+
+    if (currentUser?.id) {
+      url += `&currentUserId=${encodeURIComponent(currentUser.id)}`;
+    } else if (currentUser?.username) {
       url += `&currentUserId=${encodeURIComponent(currentUser.username)}`;
     }
     
@@ -238,19 +242,45 @@ export class PostService {
   }
 
   getLikedPostsByUser(username: string): Observable<PostResponse[]> {
+    let currentUser: any = null;
+    this.authService.currentUser$.subscribe(user => currentUser = user).unsubscribe();
+    
+    console.log('getLikedPostsByUser - currentUser:', currentUser);
+    console.log('getLikedPostsByUser - currentUser.id:', currentUser?.id);
+    console.log('getLikedPostsByUser - currentUser.username:', currentUser?.username);
+    
     const encodedUsername = encodeURIComponent(username);
-    return this.http.get<PostResponse[]>(`${this.apiUrl}/api/posts/liked/user/username/${encodedUsername}`, {
+    let url = `${this.apiUrl}/api/posts/liked/user/username/${encodedUsername}`;
+
+    if (currentUser?.id) {
+      url += `?currentUserId=${encodeURIComponent(currentUser.id)}`;
+    } else if (currentUser?.username) {
+      url += `?currentUserId=${encodeURIComponent(currentUser.username)}`;
+    }
+    
+    console.log('Fetching liked posts from URL:', url);
+    
+    return this.http.get<PostResponse[]>(url, {
       headers: this.getAuthHeaders()
     }).pipe(
+      tap((rawPosts: any) => console.log('Raw liked posts from API:', JSON.stringify(rawPosts, null, 2))),
       map((posts: any[]) => 
-        posts.map(post => ({
-          ...post,
-          createdAt: new Date(post.createdAt),
-          updatedAt: new Date(post.updatedAt),
-          likeCount: post.likeCount || 0,
-          isLikedByCurrentUser: post.isLikedByCurrentUser || false
-        }))
-      )
+        posts.map(post => {
+          const parsedPost = {
+            ...post,
+            createdAt: new Date(post.createdAt),
+            updatedAt: new Date(post.updatedAt),
+            likeCount: post.likeCount || 0,
+            isLikedByCurrentUser: post.isLikedByCurrentUser || false
+          };
+          console.log('Parsed liked post:', parsedPost);
+          return parsedPost;
+        })
+      ),
+      tap({
+        next: (response: PostResponse[]) => console.log('Processed liked posts:', response),
+        error: (error: any) => console.error('Liked posts API error:', error)
+      })
     );
   }
 
