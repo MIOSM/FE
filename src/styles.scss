@@ -726,11 +726,6 @@ body {
         text-transform: none;
         letter-spacing: normal;
         display: inline-block;
-
-        &::before {
-          content: '·';
-          margin: 0 4px;
-        }
       }
     }
   }

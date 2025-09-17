@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
-  background-color: #fafafa;
+  background-color: var(--bg-secondary);
 }
 
 .dashboard-header {
@@ -17,29 +17,29 @@
 .dashboard-title {
   font-size: 28px;
   font-weight: 700;
-  color: #262626;
+  color: var(--text-primary);
   margin: 0;
   display: flex;
   align-items: center;
   gap: 12px;
 
   i {
-    color: #405de6;
+    color: var(--primary-500);
   }
 }
 
 .refresh-btn {
   background: none;
-  border: 1px solid #dbdbdb;
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
-  color: #262626;
+  color: var(--text-primary);
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: #f5f5f5;
-    border-color: #c7c7c7;
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-primary);
   }
 
   &:disabled {
@@ -61,7 +61,6 @@
   width: 100%;
 }
 
-// Loading State
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -82,7 +81,7 @@
 }
 
 .loading-text {
-  color: #8e8e8e;
+  color: var(--text-secondary);
   font-size: 16px;
   margin: 0;
 }
@@ -99,18 +98,18 @@
 
 .error-icon {
   font-size: 48px;
-  color: #ed4956;
+  color: var(--error-500);
   margin-bottom: 16px;
 }
 
 .error-message {
-  color: #262626;
+  color: var(--text-primary);
   font-size: 16px;
   margin: 0 0 20px 0;
 }
 
 .retry-btn {
-  background-color: #405de6;
+  background-color: var(--primary-500);
   color: white;
   border: none;
   border-radius: 8px;
@@ -123,7 +122,7 @@
   gap: 8px;
 
   &:hover {
-    background-color: #3651d4;
+    background-color: var(--primary-600);
   }
 }
 
@@ -138,19 +137,19 @@
 
 .empty-icon {
   font-size: 64px;
-  color: #c7c7c7;
+  color: var(--text-muted);
   margin-bottom: 20px;
 }
 
 .empty-title {
-  color: #262626;
+  color: var(--text-primary);
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 8px 0;
 }
 
 .empty-message {
-  color: #8e8e8e;
+  color: var(--text-secondary);
   font-size: 16px;
   margin: 0;
 }
@@ -192,14 +191,14 @@
 }
 
 .post-card {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 12px;
-  border: 1px solid #dbdbdb;
+  border: 1px solid var(--border-primary);
   overflow: hidden;
   transition: box-shadow 0.2s ease;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -238,18 +237,26 @@
 
 .post-username {
   font-weight: 600;
-  color: #262626;
+  color: var(--text-primary);
   cursor: pointer;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #405de6;
+    color: var(--primary-500);
   }
 }
 
 .post-time {
   font-size: 12px;
-  color: #8e8e8e;
+  color: var(--text-secondary);
+  &::before {
+    content: none !important;
+  }
+}
+
+:host ::ng-deep .post-card .post-header .post-user-info .post-time::before {
+  content: none !important;
+  margin: 0 !important;
 }
 
 .post-content {
@@ -257,7 +264,7 @@
 }
 
 .post-text {
-  color: #262626;
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0 0 12px 0;
   word-wrap: break-word;
@@ -319,7 +326,7 @@
   align-items: center;
   gap: 16px;
   padding: 12px 16px;
-  border-top: 1px solid #efefef;
+  border-top: 1px solid var(--border-primary);
 }
 
 .action-btn {
@@ -333,12 +340,12 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #8e8e8e;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: #f5f5f5;
-    color: #262626;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
   }
 
   &:disabled {
@@ -353,7 +360,7 @@
 
 .like-btn {
   &.liked {
-    color: #ed4956;
+    color: var(--error-500);
     
     i {
       animation: heartBeat 0.3s ease;
@@ -361,8 +368,8 @@
   }
 
   &:hover:not(:disabled) {
-    color: #ed4956;
-    background-color: rgba(237, 73, 86, 0.1);
+    color: var(--error-500);
+    background-color: rgba(255, 26, 26, 0.1);
   }
 }
 
