@@ -108,17 +108,24 @@
       </div>
 
       <div class="posts-list" *ngIf="!isLoadingPosts && userPosts.length > 0">
-        <div class="post-card" *ngFor="let post of userPosts">
-          <div class="post-header">
-            <div class="post-avatar" [style.background-color]="getAvatarColor()" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">
-              <img *ngIf="hasValidAvatar()" [src]="userAvatar" alt="User Avatar" />
-              <div *ngIf="!hasValidAvatar()" class="avatar-text" [style.color]="getTextColor(getAvatarColor())">
+        <article class="post-card" *ngFor="let post of userPosts">
+          <header class="post-header">
+            <div class="post-avatar" (click)="navigateToUserProfile(post.username)">
+              <img 
+                *ngIf="hasValidAvatar()"
+                [src]="userAvatar"
+                [alt]="post.username + ' avatar'"
+              />
+              <div *ngIf="!hasValidAvatar()"
+                   class="avatar-fallback"
+                   [style.background-color]="getAvatarColor()"
+                   [style.color]="getTextColor(getAvatarColor())">
                 {{ getAvatarInitial() }}
               </div>
             </div>
             <div class="post-user-info">
-              <h4 class="post-username" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">{{ post.username || 'User' }}</h4>
-              <p class="post-time">{{ post.createdAt | date:'medium' }}</p>
+              <span class="post-username" (click)="navigateToUserProfile(post.username)">{{ post.username }}</span>
+              <time class="post-time">{{ post.createdAt | date:'medium' }}</time>
             </div>
             <div class="post-actions-right" *ngIf="isCurrentUserPost(post)">
               <button class="action-btn more-options" (click)="togglePostMenu(post.postId, $event)">
@@ -130,32 +137,34 @@
                 </button>
               </div>
             </div>
-          </div>
+          </header>
 
           <div class="post-content">
             <p class="post-text">{{ post.content }}</p>
 
             <div 
-              class="post-images {{ 'image-count-' + post.imageUrls.length }}" 
-              *ngIf="post.imageUrls && post.imageUrls.length > 0"
-            >
+              class="post-images {{ 'image-count-' + post.imageUrls.length }}"
+              *ngIf="post.imageUrls && post.imageUrls.length > 0">
               <img 
                 *ngFor="let imageUrl of post.imageUrls; let i = index"
-                [src]="getPostImageUrl(imageUrl)" 
-                alt="Post image" 
+                [src]="getPostImageUrl(imageUrl)"
+                [alt]="'Post image ' + (i + 1)"
                 class="post-image"
                 (click)="openMediaViewer(post.imageUrls, i, 'image')"
                 loading="lazy"
-              >
+              />
             </div>
 
-            <div class="post-videos" *ngIf="post.videoUrls && post.videoUrls.length > 0">
+            <div *ngIf="post.videoUrls && post.videoUrls.length > 0" class="post-videos">
               <video 
                 *ngFor="let videoUrl of post.videoUrls; let i = index"
                 [src]="getPostImageUrl(videoUrl)"
-                (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
+                class="post-video"
                 controls
-                class="post-video">
+                preload="metadata"
+                (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
+              >
+                Your browser does not support the video tag.
               </video>
             </div>
           </div>
@@ -172,15 +181,16 @@
               <i class="fas fa-spinner fa-spin" *ngIf="isLiking(post.postId)"></i>
               <span>{{ post.likeCount || 0 }}</span>
             </button>
-            <button class="action-btn">
-              <i class="fas fa-comment"></i>
-              <span>0</span>
+            <button class="action-btn comment-btn">
+              <i class="far fa-comment"></i>
+              <span>Comment</span>
             </button>
-            <button class="action-btn">
+            <button class="action-btn share-btn">
               <i class="fas fa-share"></i>
+              <span>Share</span>
             </button>
           </div>
-        </div>
+        </article>
       </div>
 
       <div class="empty-state posts-empty" *ngIf="!isLoadingPosts && userPosts.length === 0">
@@ -222,17 +232,24 @@
       </div>
 
       <div class="posts-list" *ngIf="!isLoadingLikedPosts && likedPosts.length > 0">
-        <div class="post-card" *ngFor="let post of likedPosts">
-          <div class="post-header">
-            <div class="post-avatar" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">
-              <img *ngIf="post.userAvatar" [src]="getPostUserAvatarUrl(post.userAvatar)" alt="User Avatar" />
-              <div *ngIf="!post.userAvatar" class="avatar-text" [style.background-color]="getAvatarColor(post.username)" [style.color]="getTextColor(getAvatarColor(post.username))">
+        <article class="post-card" *ngFor="let post of likedPosts">
+          <header class="post-header">
+            <div class="post-avatar" (click)="navigateToUserProfile(post.username)">
+              <img 
+                *ngIf="post.userAvatar"
+                [src]="getPostUserAvatarUrl(post.userAvatar)"
+                [alt]="post.username + ' avatar'"
+              />
+              <div *ngIf="!post.userAvatar"
+                   class="avatar-fallback"
+                   [style.background-color]="getAvatarColor(post.username)"
+                   [style.color]="getTextColor(getAvatarColor(post.username))">
                 {{ getAvatarInitial(post.username) }}
               </div>
             </div>
             <div class="post-user-info">
-              <h4 class="post-username" (click)="navigateToUserProfile(post.username)" style="cursor: pointer;">{{ post.username || 'User' }}</h4>
-              <p class="post-time">{{ post.createdAt | date:'medium' }}</p>
+              <span class="post-username" (click)="navigateToUserProfile(post.username)">{{ post.username }}</span>
+              <time class="post-time">{{ post.createdAt | date:'medium' }}</time>
             </div>
             <div class="post-actions-right" *ngIf="isCurrentUserPost(post)">
               <button class="action-btn more-options" (click)="togglePostMenu(post.postId, $event)">
@@ -244,32 +261,34 @@
                 </button>
               </div>
             </div>
-          </div>
+          </header>
 
           <div class="post-content">
             <p class="post-text">{{ post.content }}</p>
 
             <div 
-              class="post-images {{ 'image-count-' + post.imageUrls.length }}" 
-              *ngIf="post.imageUrls && post.imageUrls.length > 0"
-            >
+              class="post-images {{ 'image-count-' + post.imageUrls.length }}"
+              *ngIf="post.imageUrls && post.imageUrls.length > 0">
               <img 
                 *ngFor="let imageUrl of post.imageUrls; let i = index"
-                [src]="getPostImageUrl(imageUrl)" 
-                alt="Post image" 
+                [src]="getPostImageUrl(imageUrl)"
+                [alt]="'Post image ' + (i + 1)"
                 class="post-image"
                 (click)="openMediaViewer(post.imageUrls, i, 'image')"
                 loading="lazy"
-              >
+              />
             </div>
 
-            <div class="post-videos" *ngIf="post.videoUrls && post.videoUrls.length > 0">
+            <div *ngIf="post.videoUrls && post.videoUrls.length > 0" class="post-videos">
               <video 
                 *ngFor="let videoUrl of post.videoUrls; let i = index"
                 [src]="getPostImageUrl(videoUrl)"
-                (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
+                class="post-video"
                 controls
-                class="post-video">
+                preload="metadata"
+                (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
+              >
+                Your browser does not support the video tag.
               </video>
             </div>
           </div>
@@ -286,15 +305,16 @@
               <i class="fas fa-spinner fa-spin" *ngIf="isLiking(post.postId)"></i>
               <span>{{ post.likeCount || 0 }}</span>
             </button>
-            <button class="action-btn">
-              <i class="fas fa-comment"></i>
-              <span>0</span>
+            <button class="action-btn comment-btn">
+              <i class="far fa-comment"></i>
+              <span>Comment</span>
             </button>
-            <button class="action-btn">
+            <button class="action-btn share-btn">
               <i class="fas fa-share"></i>
+              <span>Share</span>
             </button>
           </div>
-        </div>
+        </article>
       </div>
 
       <div class="empty-state likes-empty" *ngIf="!isLoadingLikedPosts && likedPosts.length === 0">
