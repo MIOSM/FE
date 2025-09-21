@@ -66,16 +66,18 @@
               [alt]="'Post image ' + (i + 1)"
               class="post-image"
               (error)="onImageError($event)"
+              (click)="openMediaViewer(post.imageUrls, i, 'image')"
             />
           </div>
 
           <div *ngIf="post.videoUrls && post.videoUrls.length > 0" class="post-videos">
             <video 
-              *ngFor="let videoUrl of post.videoUrls" 
+              *ngFor="let videoUrl of post.videoUrls; let i = index" 
               [src]="getImageProxyUrl(videoUrl)"
               class="post-video"
               controls
               preload="metadata"
+              (click)="$event.preventDefault(); openMediaViewer(post.videoUrls, i, 'video')"
             >
               Your browser does not support the video tag.
             </video>
@@ -104,6 +106,43 @@
             </button>
           </div>
       </article>
+    </div>
+  </div>
+
+  <div class="media-viewer-overlay" *ngIf="showMediaViewer" (click)="closeMediaViewer()">
+    <div class="media-viewer-container" (click)="$event.stopPropagation()">
+      <button class="close-button" (click)="closeMediaViewer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <ng-container *ngIf="currentMediaType === 'image'">
+        <img [src]="currentMediaUrls[currentMediaIndex]" class="media-content" alt="Media content" />
+      </ng-container>
+
+      <ng-container *ngIf="currentMediaType === 'video'">
+        <video [src]="currentMediaUrls[currentMediaIndex]" class="media-content" controls autoplay></video>
+      </ng-container>
+
+      <div class="media-navigation">
+        <button (click)="$event.stopPropagation(); navigateMedia('prev')" *ngIf="currentMediaUrls.length > 1">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div></div>
+        <button (click)="$event.stopPropagation(); navigateMedia('next')" *ngIf="currentMediaUrls.length > 1">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <div class="media-counter" *ngIf="currentMediaUrls.length > 1">
+        {{ currentMediaIndex + 1 }} / {{ currentMediaUrls.length }}
+      </div>
     </div>
   </div>
 </div>

@@ -19,6 +19,11 @@ export class DashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
   likingPosts = new Set<string>();
+  // Media viewer state
+  showMediaViewer = false;
+  currentMediaIndex = 0;
+  currentMediaUrls: string[] = [];
+  currentMediaType: 'image' | 'video' = 'image';
 
   constructor(
     private postService: PostService,
@@ -121,6 +126,31 @@ export class DashboardComponent implements OnInit {
     }
     
     return imageUrl;
+  }
+
+  openMediaViewer(mediaUrls: string[], initialIndex: number = 0, type: 'image' | 'video' = 'image'): void {
+    if (!mediaUrls || mediaUrls.length === 0) {
+      return;
+    }
+    this.currentMediaUrls = mediaUrls.map(url => this.getImageProxyUrl(url));
+    this.currentMediaIndex = Math.min(Math.max(0, initialIndex), this.currentMediaUrls.length - 1);
+    this.currentMediaType = type;
+    this.showMediaViewer = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeMediaViewer(): void {
+    this.showMediaViewer = false;
+    document.body.style.overflow = '';
+  }
+
+  navigateMedia(direction: 'prev' | 'next'): void {
+    if (!this.currentMediaUrls.length) return;
+    if (direction === 'prev') {
+      this.currentMediaIndex = (this.currentMediaIndex - 1 + this.currentMediaUrls.length) % this.currentMediaUrls.length;
+    } else {
+      this.currentMediaIndex = (this.currentMediaIndex + 1) % this.currentMediaUrls.length;
+    }
   }
 
   formatDate(date: Date): string {

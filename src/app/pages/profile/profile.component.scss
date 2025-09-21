@@ -304,6 +304,9 @@
   z-index: 10;
   
   .nav-tabs {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     display: flex;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -324,9 +327,6 @@
         font-size: clamp(0.8rem, 3vw, 0.9rem);
       }
     }
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
 
     .nav-tab {
       flex: 1 1 auto;
@@ -800,6 +800,7 @@
   .profile-page {
     min-height: calc(100vh - 80px);
     overflow-x: visible;
+    padding-bottom: calc(env(safe-area-inset-bottom));
   }
   
   .create-post-container {
@@ -907,6 +908,7 @@
 
   .profile-content {
     padding: 16px 0;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
 
 }
