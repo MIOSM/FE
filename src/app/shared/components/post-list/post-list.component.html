@@ -1,0 +1,71 @@
+<div class="feed-container">
+  <div *ngIf="loading && posts.length === 0" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Loading posts...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <i class="fas fa-exclamation-triangle error-icon"></i>
+    <p class="error-message">{{ error }}</p>
+    <button class="retry-btn" (click)="load()">
+      <i class="fas fa-redo"></i>
+      Try Again
+    </button>
+  </div>
+
+  <div *ngIf="!loading && !error && posts.length === 0" class="empty-container">
+    <i class="fas fa-newspaper empty-icon"></i>
+    <h3 class="empty-title">No posts yet</h3>
+    <p class="empty-message">Nothing to show here for now.</p>
+  </div>
+
+  <div *ngIf="!loading && !error && posts.length > 0" class="posts-feed">
+    <app-post-card
+      *ngFor="let post of posts; trackBy: trackByPostId"
+      [post]="post"
+      [liking]="isLiking(post.postId)"
+      [showOwnerActions]="isOwner(post)"
+      (like)="onLikeToggled($event)"
+      (openUser)="onOpenUser($event)"
+      (delete)="onDeletePost($event)"
+      (openMedia)="openMediaViewer($event.urls, $event.index, $event.type)">
+    </app-post-card>
+  </div>
+</div>
+
+<div class="media-viewer-overlay" *ngIf="showMediaViewer" (click)="closeMediaViewer()">
+  <div class="media-viewer-container" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="closeMediaViewer()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <ng-container *ngIf="currentMediaType === 'image'">
+      <img [src]="currentMediaUrls[currentMediaIndex]" class="media-content" alt="Media content" />
+    </ng-container>
+
+    <ng-container *ngIf="currentMediaType === 'video'">
+      <video [src]="currentMediaUrls[currentMediaIndex]" class="media-content" controls autoplay></video>
+    </ng-container>
+
+    <div class="media-navigation">
+      <button (click)="$event.stopPropagation(); navigateMedia('prev')" *ngIf="currentMediaUrls.length > 1">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <div></div>
+      <button (click)="$event.stopPropagation(); navigateMedia('next')" *ngIf="currentMediaUrls.length > 1">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <div class="media-counter" *ngIf="currentMediaUrls.length > 1">
+      {{ currentMediaIndex + 1 }} / {{ currentMediaUrls.length }}
+    </div>
+  </div>
+</div>

@@ -4,13 +4,14 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { PostService, PostResponse } from '../../core/services/post.service';
-import { Subscription, firstValueFrom, catchError, of } from 'rxjs';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
+ 
+import { PostListComponent } from '../../shared/components/post-list/post-list.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PostListComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
@@ -36,30 +37,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
   followingList: any[] = [];
   isLoadingModal: boolean = false;
 
-  showMediaViewer: boolean = false;
-  currentMediaIndex: number = 0;
-  currentMediaUrls: string[] = [];
-  currentMediaType: 'image' | 'video' = 'image';
-  openMenuPostId: string | null = null;
-
   userAvatar: string | null = null;
   userCoverPhoto: string | null = null;
 
   activeTab: 'posts' | 'likes' | 'bookmarks' = 'posts';
-  likedPosts: PostResponse[] = [];
-  isLoadingLikedPosts: boolean = false;
   totalLikesCount: number = 0;
-  likingPosts = new Set<string>();
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private postService: PostService,
     private router: Router,
-    private route: ActivatedRoute,
-    private sanitizer: DomSanitizer
+    private route: ActivatedRoute
   ) {
-    document.addEventListener('click', this.handleClickOutside.bind(this));
   }
 
   ngOnInit(): void {
@@ -93,7 +83,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
           console.log('Loading own profile');
           this.isOwnProfile = true;
           this.profileUser = this.currentUser;
-          this.likedPosts = [];
           this.activeTab = 'posts';
           this.loadUserProfileData();
           this.loadUserPosts();
@@ -116,12 +105,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.userSubscription.unsubscribe();
     this.routeSubscription.unsubscribe();
-    document.removeEventListener('click', this.handleClickOutside.bind(this));
   }
 
   private loadOtherUserProfile(username: string): void {
     this.isLoadingProfile = true;
-    this.likedPosts = [];
     this.activeTab = 'posts';
     
     this.userService.getUserByUsername(username).subscribe({
@@ -172,44 +159,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  getPostImageUrl(imageUrl: string): string {
-    if (!imageUrl) return '';
-
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-
-    return `http://localhost:8080/post-service${imageUrl}`;
-  }
-  
-  openMediaViewer(mediaUrls: string[], initialIndex: number = 0, type: 'image' | 'video' = 'image'): void {
-    this.currentMediaUrls = mediaUrls.map(url => this.getPostImageUrl(url));
-    this.currentMediaIndex = initialIndex;
-    this.currentMediaType = type;
-    this.showMediaViewer = true;
-
-    document.body.style.overflow = 'hidden';
-  }
-  
-  closeMediaViewer(): void {
-    this.showMediaViewer = false;
-    document.body.style.overflow = '';
-  }
-  
-  navigateMedia(direction: 'prev' | 'next'): void {
-    if (direction === 'prev') {
-      this.currentMediaIndex = (this.currentMediaIndex - 1 + this.currentMediaUrls.length) % this.currentMediaUrls.length;
-    } else {
-      this.currentMediaIndex = (this.currentMediaIndex + 1) % this.currentMediaUrls.length;
-    }
-  }
-  
-  getCurrentMediaUrl(): SafeUrl {
-    if (!this.currentMediaUrls.length) return '';
-    const url = this.currentMediaUrls[this.currentMediaIndex];
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
-
   private getProxyImageUrl(imageUrl: string | null | undefined): string | null {
     if (!imageUrl) {
       return null;
@@ -234,51 +183,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.router.navigate(['/settings']);
   }
 
-  openImagePreview(imageUrl: string): void {
-    console.log('Opening image preview:', imageUrl);
-    window.open(imageUrl, '_blank');
-  }
-
-  onDeletePost(postId: string, event: Event): void {
-    event.stopPropagation();
-    this.closeAllMenus();
-    
-    if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-      this.postService.deletePost(postId).subscribe({
-        next: () => {
-          this.userPosts = this.userPosts.filter(post => post.postId !== postId);
-          console.log('Post deleted successfully');
-        },
-        error: (error) => {
-          console.error('Error deleting post:', error);
-          alert('Failed to delete post. Please try again.');
-        }
-      });
-    }
-  }
-
   isCurrentUserPost(post: PostResponse): boolean {
     return this.currentUser?.username === post.username;
-  }
-
-  togglePostMenu(postId: string, event: Event): void {
-    event.stopPropagation();
-    this.openMenuPostId = this.openMenuPostId === postId ? null : postId;
-  }
-
-  isMenuOpen(postId: string): boolean {
-    return this.openMenuPostId === postId;
-  }
-
-  closeAllMenus(): void {
-    this.openMenuPostId = null;
-  }
-
-  private handleClickOutside(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.post-actions-right') && this.openMenuPostId) {
-      this.closeAllMenus();
-    }
   }
 
   createPost(): void {
@@ -571,86 +477,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     return !!(this.userCoverPhoto && this.userCoverPhoto.trim());
   }
 
-  getPostUserAvatarUrl(avatarUrl: string): string {
-    return this.userService.getAvatarProxyUrl(avatarUrl);
-  }
-
   setActiveTab(tab: 'posts' | 'likes' | 'bookmarks'): void {
     this.activeTab = tab;
-    
-    if (tab === 'likes') {
-      this.likedPosts = [];
-      this.loadLikedPosts();
-    }
   }
-
-  private loadLikedPosts(): void {
-    if (!this.profileUser?.username) {
-      console.warn('No username available for liked posts');
-      return;
-    }
-
-    this.isLoadingLikedPosts = true;
-    this.postService.getLikedPostsByUser(this.profileUser.username).subscribe({
-      next: (posts) => {
-        console.log('Loaded liked posts:', posts);
-        this.enrichLikedPostsWithAvatars(posts);
-      },
-      error: (error) => {
-        console.error('Error loading liked posts:', error);
-        this.likedPosts = [];
-        this.isLoadingLikedPosts = false;
-      }
-    });
-  }
-
-  private async enrichLikedPostsWithAvatars(posts: PostResponse[]): Promise<void> {
-    const usernamesNeedingAvatars = [...new Set(
-      posts
-        .filter(post => !post.userAvatar)
-        .map(post => post.username)
-    )];
-
-    if (usernamesNeedingAvatars.length === 0) {
-      this.likedPosts = posts;
-      this.isLoadingLikedPosts = false;
-      return;
-    }
-
-    try {
-      const userRequests = usernamesNeedingAvatars.map(username =>
-        firstValueFrom(
-          this.userService.getUserByUsername(username).pipe(
-            catchError((error: any) => {
-              console.warn(`Failed to fetch user data for ${username}:`, error);
-              return of(null);
-            })
-          )
-        )
-      );
-
-      const users = await Promise.all(userRequests);
-
-      const avatarMap = new Map<string, string>();
-      users.forEach((user: any) => {
-        if (user && user.username) {
-          avatarMap.set(user.username, user.avatarUrl || '');
-        }
-      });
-
-      this.likedPosts = posts.map(post => ({
-        ...post,
-        userAvatar: post.userAvatar || avatarMap.get(post.username) || ''
-      }));
-
-    } catch (error) {
-      console.error('Error enriching posts with avatars:', error);
-      this.likedPosts = posts;
-    } finally {
-      this.isLoadingLikedPosts = false;
-    }
-  }
-
   private loadTotalLikesCount(): void {
     if (!this.profileUser?.username) {
       console.warn('No username available for total likes count');
@@ -669,44 +498,4 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  async toggleLike(post: PostResponse): Promise<void> {
-    if (this.likingPosts.has(post.postId)) {
-      return; 
-    }
-
-    this.likingPosts.add(post.postId);
-
-    try {
-      if (post.isLikedByCurrentUser) {
-
-        const response = await firstValueFrom(this.postService.unlikePost(post.postId));
-        if (response.success) {
-          post.isLikedByCurrentUser = false;
-          post.likeCount = Math.max(0, post.likeCount - 1);
-
-          if (post.userId === this.profileUser?.id) {
-            this.totalLikesCount = Math.max(0, this.totalLikesCount - 1);
-          }
-        }
-      } else {
-        const response = await firstValueFrom(this.postService.likePost(post.postId));
-        if (response.success) {
-          post.isLikedByCurrentUser = true;
-          post.likeCount = (post.likeCount || 0) + 1;
-
-          if (post.userId === this.profileUser?.id) {
-            this.totalLikesCount = (this.totalLikesCount || 0) + 1;
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    } finally {
-      this.likingPosts.delete(post.postId);
-    }
-  }
-
-  isLiking(postId: string): boolean {
-    return this.likingPosts.has(postId);
-  }
 }

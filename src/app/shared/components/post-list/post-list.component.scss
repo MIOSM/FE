@@ -1,0 +1,13 @@
+.feed-container { width: 100%; }
+.posts-feed { display: flex; flex-direction: column; gap: 8px; }
+.loading-container, .error-container, .empty-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; color: var(--text-secondary);
+}
+.retry-btn { margin-top: 8px; }
+
+.media-viewer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.media-viewer-container { position: relative; max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
+.media-content { max-width: 90vw; max-height: 80vh; border-radius: 8px; }
+.media-navigation { position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; transform: translateY(-50%); padding: 0 8px; }
+.media-counter { position: absolute; bottom: 8px; right: 12px; color: #fff; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+.close-button { position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: #fff; cursor: pointer; }

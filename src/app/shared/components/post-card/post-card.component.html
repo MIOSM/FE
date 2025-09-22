@@ -1,0 +1,73 @@
+<article class="post-card">
+  <header class="post-header">
+    <div class="post-avatar" (click)="onOpenUser()">
+      <img *ngIf="hasValidAvatar(post.userAvatar)"
+           [src]="getAvatarUrl(post.userAvatar)"
+           [alt]="post.username + ' avatar'" />
+      <div *ngIf="!hasValidAvatar(post.userAvatar)"
+           class="avatar-fallback"
+           [style.background-color]="getAvatarColor(post.username)"
+           [style.color]="getTextColor(getAvatarColor(post.username))">
+        {{ getAvatarInitial(post.username) }}
+      </div>
+    </div>
+    <div class="post-user-info">
+      <span class="post-username" (click)="onOpenUser()">{{ post.username }}</span>
+      <time class="post-time">{{ post.createdAt | date:'medium' }}</time>
+    </div>
+    <div class="post-actions-right" *ngIf="showOwnerActions">
+      <button class="action-btn more-options" (click)="toggleMenu($event)">
+        <i class="fas fa-ellipsis-h"></i>
+      </button>
+      <div class="post-dropdown-menu" [class.show]="openMenu">
+        <button class="dropdown-item delete-btn" (click)="onDelete($event)">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="post-content">
+    <p class="post-text" *ngIf="post.content">{{ post.content }}</p>
+
+    <div class="post-images {{ 'image-count-' + (post.imageUrls?.length || 0) }}"
+         *ngIf="post.imageUrls && post.imageUrls.length > 0">
+      <img *ngFor="let imageUrl of post.imageUrls; trackBy: trackByIndex; let i = index"
+           [src]="imageUrl"
+           [alt]="'Post image ' + (i + 1)"
+           class="post-image"
+           (click)="onOpenImage(i)" />
+    </div>
+
+    <div *ngIf="post.videoUrls && post.videoUrls.length > 0" class="post-videos">
+      <video *ngFor="let videoUrl of post.videoUrls; trackBy: trackByIndex; let i = index"
+             [src]="videoUrl"
+             class="post-video"
+             controls
+             preload="metadata"
+             (click)="$event.preventDefault(); onOpenVideo(i)">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+
+  <div class="post-actions">
+    <button class="action-btn like-btn"
+            [class.liked]="post.isLikedByCurrentUser"
+            [disabled]="liking"
+            (click)="onLikeClicked()">
+      <i class="fas fa-heart" *ngIf="post.isLikedByCurrentUser"></i>
+      <i class="far fa-heart" *ngIf="!post.isLikedByCurrentUser"></i>
+      <i class="fas fa-spinner fa-spin" *ngIf="liking"></i>
+      <span>{{ post.likeCount || 0 }}</span>
+    </button>
+    <button class="action-btn comment-btn">
+      <i class="far fa-comment"></i>
+      <span>Comment</span>
+    </button>
+    <button class="action-btn share-btn">
+      <i class="fas fa-share"></i>
+      <span>Share</span>
+    </button>
+  </div>
+</article>
