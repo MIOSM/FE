@@ -13,10 +13,78 @@
     </button>
   </div>
 
-  <div *ngIf="!loading && !error && posts.length === 0" class="empty-container">
-    <i class="fas fa-newspaper empty-icon"></i>
-    <h3 class="empty-title">No posts yet</h3>
-    <p class="empty-message">Nothing to show here for now.</p>
+  <div *ngIf="!loading && !error && posts.length === 0">
+    <ng-container [ngSwitch]="emptyVariant">
+      <ng-container *ngSwitchCase="'profile-posts'">
+        <div class="empty-state posts-empty">
+          <div class="empty-icon-container">
+            <div class="empty-icon posts-icon">
+              <i class="fas fa-feather-alt"></i>
+            </div>
+            <div class="empty-icon-bg"></div>
+          </div>
+          <div class="empty-content">
+            <ng-container *ngIf="isOwnProfileView(); else otherUserPostsEmpty">
+              <h3>No posts yet</h3>
+              <p>Share your thoughts, photos, and moments with your followers. Your posts will appear here.</p>
+              <div class="empty-suggestion">
+                <i class="fas fa-lightbulb"></i>
+                <span>Tip: Click the button below to create your first post and start sharing!</span>
+              </div>
+              <button class="create-post-btn enhanced" (click)="goToCreatePost()">
+                <i class="fas fa-plus"></i>
+                Create your first post
+              </button>
+            </ng-container>
+            <ng-template #otherUserPostsEmpty>
+              <h3>No posts yet</h3>
+              <p>{{ username || 'This user' }} hasn't shared any posts yet. Check back later for updates!</p>
+              <div class="empty-suggestion">
+                <i class="fas fa-info-circle"></i>
+                <span>New posts from {{ username || 'this user' }} will appear here when they start sharing.</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'profile-likes'">
+        <div class="empty-state likes-empty">
+          <div class="empty-icon-container">
+            <div class="empty-icon likes-icon">
+              <i class="fas fa-heart"></i>
+            </div>
+            <div class="empty-icon-bg"></div>
+          </div>
+          <div class="empty-content">
+            <ng-container *ngIf="isOwnProfileView(); else otherUserLikesEmpty">
+              <h3>No liked posts yet</h3>
+              <p>When you like posts, they'll appear here so you can easily find them later.</p>
+              <div class="empty-suggestion">
+                <i class="fas fa-lightbulb"></i>
+                <span>Tip: Double-tap or click the heart icon on posts you enjoy!</span>
+              </div>
+            </ng-container>
+            <ng-template #otherUserLikesEmpty>
+              <h3>No liked posts</h3>
+              <p>{{ username || 'This user' }} hasn't liked any posts yet.</p>
+              <div class="empty-suggestion">
+                <i class="fas fa-info-circle"></i>
+                <span>Liked posts will appear here when they start engaging with content.</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchDefault>
+        <div class="empty-container">
+          <i class="fas fa-newspaper empty-icon"></i>
+          <h3 class="empty-title">No posts yet</h3>
+          <p class="empty-message">Nothing to show here for now.</p>
+        </div>
+      </ng-container>
+    </ng-container>
   </div>
 
   <div *ngIf="!loading && !error && posts.length > 0" class="posts-feed">

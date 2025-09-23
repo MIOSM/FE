@@ -42,6 +42,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   activeTab: 'posts' | 'likes' | 'bookmarks' = 'posts';
   totalLikesCount: number = 0;
+  postsCountForUser: number = 0; 
 
   constructor(
     private authService: AuthService,
@@ -189,6 +190,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   createPost(): void {
     this.router.navigate(['/create-post']);
+  }
+
+  onPostsChanged(count: number): void {
+    this.postsCountForUser = count || 0;
   }
 
   navigateToUserProfile(username: string): void {

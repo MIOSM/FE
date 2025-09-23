@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PostService, PostResponse } from '../../../core/services/post.service';
 import { UserService, SearchUser } from '../../../core/services/user.service';
@@ -19,6 +19,8 @@ export class PostListComponent implements OnInit, OnChanges {
   @Input() mode: 'feed' | 'profile' | 'likes' = 'feed';
   @Input() username?: string; 
   @Input() pageSize = 10;
+  @Input() emptyVariant?: 'profile-posts' | 'profile-likes';
+  @Output() postsChanged = new EventEmitter<number>();
 
   loading = true;
   error: string | null = null;
@@ -86,6 +88,7 @@ export class PostListComponent implements OnInit, OnChanges {
     console.error('Error loading posts:', error);
     this.error = 'Failed to load posts. Please try again.';
     this.loading = false;
+    this.postsChanged.emit(this.posts.length);
   }
 
   private async afterLoad(posts: PostResponse[]): Promise<void> {
@@ -179,6 +182,17 @@ export class PostListComponent implements OnInit, OnChanges {
     this.router.navigate(['/profile', username]);
   }
 
+  isOwnProfileView(): boolean {
+    const currentUser: User | null = this.authService.getCurrentUser();
+    const u = (this.username || '').toLowerCase();
+    const cu = (currentUser?.username || '').toLowerCase();
+    return !!u && !!cu && u === cu;
+  }
+
+  goToCreatePost(): void {
+    this.router.navigate(['/create-post']);
+  }
+
   openMediaViewer(mediaUrls: string[], initialIndex: number = 0, type: 'image' | 'video' = 'image'): void {
     if (!mediaUrls?.length) return;
     this.currentMediaUrls = mediaUrls.map(url => this.getProxyMediaUrl(url));
@@ -211,6 +225,7 @@ export class PostListComponent implements OnInit, OnChanges {
     this.postService.deletePost(post.postId).subscribe({
       next: () => {
         this.posts = this.posts.filter(p => p.postId !== post.postId);
+        this.postsChanged.emit(this.posts.length);
       },
       error: (err) => {
         console.error('Error deleting post:', err);

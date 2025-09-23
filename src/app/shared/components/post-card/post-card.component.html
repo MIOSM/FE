@@ -30,7 +30,7 @@
   <div class="post-content">
     <p class="post-text" *ngIf="post.content">{{ post.content }}</p>
 
-    <div class="post-images {{ 'image-count-' + (post.imageUrls?.length || 0) }}"
+    <div class="post-images {{ 'image-count-' + ((post.imageUrls && post.imageUrls.length) || 0) }}"
          *ngIf="post.imageUrls && post.imageUrls.length > 0">
       <img *ngFor="let imageUrl of post.imageUrls; trackBy: trackByIndex; let i = index"
            [src]="imageUrl"

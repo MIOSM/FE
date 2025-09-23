@@ -90,7 +90,7 @@
 
   <div class="profile-content">
     <div class="posts-section" *ngIf="activeTab === 'posts'">
-      <div class="create-post-container" *ngIf="isOwnProfile">
+      <div class="create-post-container" *ngIf="isOwnProfile && postsCountForUser > 0">
         <button class="create-post-btn" (click)="createPost()">
           <div class="post-avatar">
             <img *ngIf="hasValidAvatar()" [src]="userAvatar" alt="User Avatar" />
@@ -101,11 +101,11 @@
           <span class="create-post-text">What's on your mind?</span>
         </button>
       </div>
-      <app-post-list [mode]="'profile'" [username]="profileUser?.username"></app-post-list>
+      <app-post-list [mode]="'profile'" [username]="profileUser?.username" [emptyVariant]="'profile-posts'" (postsChanged)="onPostsChanged($event)"></app-post-list>
     </div>
 
     <div class="likes-section" *ngIf="activeTab === 'likes'">
-      <app-post-list [mode]="'likes'" [username]="profileUser?.username"></app-post-list>
+      <app-post-list [mode]="'likes'" [username]="profileUser?.username" [emptyVariant]="'profile-likes'"></app-post-list>
     </div>
 
     <div class="bookmarks-section" *ngIf="activeTab === 'bookmarks'">
