@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PostResponse } from '../../../core/services/post.service';
 import { UserService } from '../../../core/services/user.service';
+import { LocalTimePipe } from '../../pipes/local-time.pipe';
 
 @Component({
   selector: 'app-post-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LocalTimePipe],
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.scss']
 })

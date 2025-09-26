@@ -65,12 +65,39 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.currentUser = fullUser;
             this.isLoadingUserProfile = false;
             console.log('Updated currentUser with full profile:', this.currentUser);
+            const routeUsername = this.route.snapshot.params['username'];
+            if (routeUsername && this.currentUser && routeUsername === this.currentUser.username) {
+              if (!this.isOwnProfile || !this.profileUser || this.profileUser.username !== this.currentUser.username) {
+                console.log('Re-evaluated as own profile after loading full user');
+                this.isOwnProfile = true;
+                this.profileUser = this.currentUser;
+                this.activeTab = 'posts';
+                this.loadUserProfileData();
+                this.loadUserPosts();
+                this.loadSubscriptionData();
+                this.loadTotalLikesCount();
+              }
+            }
           },
           error: (error) => {
             console.error('Error fetching user profile:', error);
             this.isLoadingUserProfile = false;
           }
         });
+      } else {
+        const routeUsername = this.route.snapshot.params['username'];
+        if (routeUsername && this.currentUser && routeUsername === this.currentUser.username) {
+          if (!this.isOwnProfile || !this.profileUser || this.profileUser.username !== this.currentUser.username) {
+            console.log('Re-evaluated as own profile with existing currentUser');
+            this.isOwnProfile = true;
+            this.profileUser = this.currentUser;
+            this.activeTab = 'posts';
+            this.loadUserProfileData();
+            this.loadUserPosts();
+            this.loadSubscriptionData();
+            this.loadTotalLikesCount();
+          }
+        }
       }
     });
 

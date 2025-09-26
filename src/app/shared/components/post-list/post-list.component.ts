@@ -133,6 +133,7 @@ export class PostListComponent implements OnInit, OnChanges {
     }
 
     this.loading = false;
+    this.postsChanged.emit(this.posts.length);
   }
 
   private getProxyMediaUrl(imageUrl: string): string {
